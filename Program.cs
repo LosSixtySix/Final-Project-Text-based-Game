@@ -8,7 +8,7 @@ int dTwenty = rand.Next(1, 20);
 int dEight = rand.Next(1, 8);
 int dSix = rand.Next(1, 6);
 int dFour = rand.Next(1, 4);
-int hitPoints = 0;
+int hitPoints = 10;
 
 
 //Print castle image as grid//
@@ -34,6 +34,14 @@ printCastle();
 Console.WriteLine("The Castle of Terath");
 Console.WriteLine("Press Enter to Continue");
 Console.ReadLine();
+
+
+//Player
+int level = 1;
+int experience = 0;
+int inventoryCount = 5;
+string [] inventory = new string[inventoryCount];
+int playerHp = hitPoints + level;
 
 
 //Combat//
