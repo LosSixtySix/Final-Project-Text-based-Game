@@ -49,11 +49,9 @@ int playerIntiative = 10 + level;
 
 
 //Combat//
-string monsterPic = "monster.txt";
-if(monsterType() == 1)
-{
-    monsterPic = "monster.txt";
-}
+string monsterPicNumber = monsterType().ToString();
+string monsterPic = $"monster{monsterPicNumber}.txt";
+
 
 string [] monsterRows = File.ReadAllLines($"{monsterPic}");
 char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
