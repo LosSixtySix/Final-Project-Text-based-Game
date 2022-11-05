@@ -34,7 +34,10 @@ printCastle();
 Console.WriteLine("The Castle of Terath");
 Console.WriteLine("Press Enter to Continue");
 Console.ReadLine();
-
+//Monster
+int monstInti = monsterType();
+int monsterLevel = monsterType();
+int monsterIntiative = monstInti + monsterLevel;
 
 //Player
 int level = 1;
@@ -42,6 +45,7 @@ int experience = 0;
 int inventoryCount = 5;
 string [] inventory = new string[inventoryCount];
 int playerHp = hitPoints + level;
+int playerIntiative = 10 + level;
 
 
 //Combat//
@@ -54,8 +58,42 @@ char[][] knightChar = knightRows.Select(items => items.ToArray()).ToArray();
 combat();
 void combat()
 {
+    bool playerTurn = false;
+    bool monsterTurn = false;
+    if(playerIntiative > monsterIntiative)
+    {
+        playerTurn = true;
+    }
+    else
+    {
+        monsterTurn = true;
+    }
+    bool fight = true;
+    while(fight)
+    {
+
+
+        while(playerTurn)
+        {
+            printKnight();
+            Console.ReadLine();
+            playerTurn = false;
+            monsterTurn = true;
+
+
+        }
+        while(monsterTurn)
+        {
+            printMonster();
+            Console.ReadLine();
+            monsterTurn = false;
+            playerTurn = true;
+        }
+
+    }
     void printKnight()
     {
+        Console.Clear();
         int temp_x = 0;
         while(temp_x < 22)
         {
@@ -69,13 +107,11 @@ void combat()
         }
 
     }
-    Console.Clear();
-    printKnight();
-    Console.ReadLine();
 
 
     void printMonster()
     {
+        Console.Clear();
         int temp_x = 0;
         while(temp_x < 23)
         {
@@ -89,8 +125,10 @@ void combat()
         }
 
     }
-    Console.Clear();
-    printMonster();
-    Console.ReadLine();
 
+}
+
+static int monsterType()
+{
+    return 1;
 }
