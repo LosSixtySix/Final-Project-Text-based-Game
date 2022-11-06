@@ -4,11 +4,15 @@ Console.Clear();
 
 //Variables//
 Random rand = new Random();
-int dTwenty = rand.Next(1, 20);
-int dEight = rand.Next(1, 8);
-int dSix = rand.Next(1, 6);
-int dFour = rand.Next(1, 4);
+int dTwenty = 21;
+int dEight = 9;
+int dSix = 7;
+int dFour = 5;
 
+int rollDie(int dice)
+{
+    return rand.Next(1, dice);
+}
 
 //Dungeon Creator
 int dungeonLevel = 0;
@@ -16,6 +20,7 @@ int roomNumber = 0;
 int numberOfRooms = 0;
 int maxRooms = 10;
 int maxDungeonLevels = 4;
+
 
 
 //Print castle image as grid//
@@ -36,17 +41,34 @@ void printCastle()
         temp_x++;
     }
 }
-printCastle();
 
+//Game Start//
+
+void main()
+{
+printCastle();
 Console.WriteLine("The Castle of Terath");
-Console.WriteLine("Press Enter to Continue");
+Console.WriteLine("Press Enter to Start");
 Console.ReadLine();
+combat();
+}
+
+
 
 //Rooms
 int randRoom = rand.Next(1, 8);
 roomNumber = randRoom;
 
 //Items
+Items shield = new Items();
+shield.name = "Shield";
+shield.level = 1;
+
+
+Items sword = new Items();
+sword.name = "Sword";
+sword.level = 1;
+sword.attackBonus = 1 + sword.level * 2;
 
 
 //Merchant
@@ -63,25 +85,29 @@ int monstInti = monsterType(dungeonLevel, roomNumber) * 5;
 int monsterLevel = monsterType(dungeonLevel, roomNumber);
 int monsterIntiative = monstInti + monsterLevel;
 int monsterHitPoints = monsterType(dungeonLevel, roomNumber) * 10;
+int monsterAC = 10 + monsterType(dungeonLevel, roomNumber) * 2;
 
 //Player
+var equippedWeapon = sword;
+var equippedShield = shield;
 int goldCount = 0;
 int hitPoints = 10;
-int level = 1;
+int Playerlevel = 1;
 int experience = 0;
 int inventoryCount = 5;
 string [] backPack = new string[inventoryCount];
-int playerHp = hitPoints + level * 2;
-int playerIntiative = 10 + level;
+int playerHp = hitPoints + Playerlevel * 2;
+int playerIntiative = 10 + Playerlevel;
+int playerAttackBonus = Playerlevel + equippedWeapon.level;
+void changeEquipment()
+{
 
+}
 
 
 //Combat//
-
-
 string [] knightRows = File.ReadAllLines("knight.txt");
 char[][] knightChar = knightRows.Select(items => items.ToArray()).ToArray();
-combat();
 void combat()
 {
     // Determine monster type
@@ -90,8 +116,16 @@ void combat()
     string [] monsterRows = File.ReadAllLines($"{monsterPic}");
     char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
 
+    bool determineHit(int targetAC, int attackBonus)
+    {
+        if(rollDie(dTwenty) + attackBonus > targetAC)
+        {
+            return true;
+        }
+        return false;
+    }
 
-
+    //Determine who goes first//
     bool playerTurn = false;
     bool monsterTurn = false;
     if(playerIntiative > monsterIntiative)
@@ -128,7 +162,7 @@ void combat()
                 switch(choice)
                 {
                     case 1:
-
+                        if(determineHit(monsterAC,equippedWeapon.attackBonus ))
                         makeAChoice = false;
                         break;
                     case 2:
@@ -202,4 +236,14 @@ static int monsterPictureType(int monsterType)
 {
     
     return monsterType;
+}
+main();
+class Items
+{
+    public string name;
+    public int level;
+    public int damageDie;
+    public int attackBonus;
+    public int damageBouns;
+    
 }
