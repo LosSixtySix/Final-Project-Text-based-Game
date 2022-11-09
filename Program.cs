@@ -8,18 +8,20 @@ int dTwenty = 21;
 int dEight = 9;
 int dSix = 7;
 int dFour = 5;
+bool playGame = true;
 
 int rollDie(int dice)
 {
     return rand.Next(1, dice);
 }
 
-//Dungeon Creator
+//Dungeon Creator Variables//
 int dungeonLevel = 0;
 int roomNumber = 0;
 int numberOfRooms = 0;
 int maxRooms = 10;
 int maxDungeonLevels = 4;
+bool bossRoom = false;
 
 
 
@@ -46,38 +48,45 @@ void printCastle()
 
 void main()
 {
-printCastle();
-Console.WriteLine("The Castle of Terath");
-Console.WriteLine("Press Enter to Start");
-Console.ReadLine();
-combat();
+while(playGame)
+{
+    printCastle();
+    Console.WriteLine("The Castle of Terath");
+    Console.WriteLine("Press Enter to Start");
+    Console.ReadLine();
+    RoomZero();
+    while(numberOfRooms <= maxRooms && playGame)
+    {
+        randRoomGenerator();
+        Console.WriteLine("Press Enter to continue");
+        Console.ReadLine();
+    }
 }
 
+}
 
-
-//Rooms
-int randRoom = rand.Next(1, 8);
-roomNumber = randRoom;
 
 //Items
 Items shield = new Items();
 shield.name = "Shield";
 shield.level = 1;
+shield.attackBonus = 5;
+shield.raiseShieldBonus = 3;
+
 
 
 Items sword = new Items();
 sword.name = "Sword";
 sword.level = 1;
 sword.attackBonus = 1 + sword.level * 2;
+sword.damageDie = dSix;
 
+Items emptySlot = new Items();
+emptySlot.name = "[Empty Slot]";
 
-//Merchant
-void shop()
-{
-    string [] merchantRows = File.ReadAllLines("merchant.txt");
-    char[][] merchantChar = merchantRows.Select(items => items.ToArray()).ToArray();
-    
-}
+Items healthPotion = new Items();
+healthPotion.name = "Health Potion";
+
 
 
 //Monster
@@ -86,6 +95,7 @@ int monsterLevel = monsterType(dungeonLevel, roomNumber);
 int monsterIntiative = monstInti + monsterLevel;
 int monsterHitPoints = monsterType(dungeonLevel, roomNumber) * 10;
 int monsterAC = 10 + monsterType(dungeonLevel, roomNumber) * 2;
+int monsterAttackDamage = 5;
 
 //Player
 var equippedWeapon = sword;
@@ -95,15 +105,16 @@ int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
 int inventoryCount = 5;
-string [] backPack = new string[inventoryCount];
+Items [] backPack = new Items[inventoryCount];
 int playerHp = hitPoints + Playerlevel * 2;
 int playerIntiative = 10 + Playerlevel;
 int playerAttackBonus = Playerlevel + equippedWeapon.level;
-void changeEquipment()
+int playerAC = 10 + Playerlevel + equippedShield.attackBonus;
+for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
-
+    backPack[backPackPlace] = emptySlot;
 }
-
+backPack.SetValue(healthPotion, 0);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -124,6 +135,14 @@ void combat()
         }
         return false;
     }
+    int Playerdamage()
+    {
+        return equippedWeapon.damageDie + equippedWeapon.damageBouns + playerAttackBonus;
+    }
+    int MonsterDamage()
+    {
+        return monsterLevel + monsterAttackDamage;
+    }
 
     //Determine who goes first//
     bool playerTurn = false;
@@ -137,12 +156,15 @@ void combat()
         monsterTurn = true;
     }
     bool fight = true;
+    int temp_playerAC = playerAC;
+    int temp_MonsterAC = monsterAC;
     while(fight)
     {
+        
 
 
         while(playerTurn)
-        {
+        {   
             bool makeAChoice = true;
             while(makeAChoice)
             {
@@ -150,10 +172,12 @@ void combat()
             
             
                 Console.WriteLine($"Hit Points: {playerHp}");
+                Console.WriteLine($"AC:{temp_playerAC}");
                 Console.WriteLine("(1) Attack! (2) Use Item (3) Raise Shield (4) Run Away!!");
                 int choice;
-                bool success = int.TryParse(Console.ReadLine(), out choice);
-                if(success != true || choice > 4 || choice <= 0)
+                int damageDealt = Playerdamage();
+                bool successChoice = int.TryParse(Console.ReadLine(), out choice);
+                if(successChoice != true || choice > 4 || choice <= 0)
                 {
                     Console.WriteLine("That is not a valid choice, press enter and try again.");
                     Console.ReadLine();
@@ -162,13 +186,31 @@ void combat()
                 switch(choice)
                 {
                     case 1:
-                        if(determineHit(monsterAC,equippedWeapon.attackBonus ))
+                        if(determineHit(temp_MonsterAC,equippedWeapon.attackBonus ))
+                        {
+                            Console.WriteLine("You Hit!!");
+                            monsterHitPoints -= damageDealt;
+                            temp_MonsterAC -= damageDealt;
+                            Console.ReadLine();
+                        }
+                        else
+                        {
+                            temp_MonsterAC -= damageDealt;
+                            Console.WriteLine("You missed!");
+                            Console.ReadLine();
+                        }
                         makeAChoice = false;
                         break;
                     case 2:
+                        Console.Clear();
+                        PrintInventory();
+                        Console.ReadLine();
                         makeAChoice = false;
                         break;
                     case 3: 
+                        temp_playerAC += shield.raiseShieldBonus *2;
+                        Console.WriteLine("Your shield is raised, making it easier to deflect attacks");
+                        Console.ReadLine();
                         makeAChoice = false;
                         break;
                     case 4:
@@ -186,9 +228,33 @@ void combat()
         while(monsterTurn)
         {
             printMonster();
+            Console.WriteLine($"HP: {monsterHitPoints}");
+            bool hit = determineHit(temp_playerAC, monsterLevel*2);
+            int monsterDamageDealt = MonsterDamage();
+            if(monsterHitPoints <= 0)
+            {
+                fight = false;
+                Console.WriteLine("You have defeated the foe!!");
+            }
+            else if(hit)
+            {
+                Console.WriteLine("The monster hits you");
+                playerHp -= monsterDamageDealt;
+                temp_playerAC -= monsterDamageDealt;
+            }
+            else if(hit == false)
+            {
+                Console.WriteLine("The monster misses");
+                temp_playerAC -= monsterDamageDealt;
+            }
             Console.ReadLine();
             monsterTurn = false;
             playerTurn = true;
+            if(playerHp <= 0)
+            {
+                fight = false;
+                playGame = false;
+            }
         }
 
     }
@@ -238,12 +304,121 @@ static int monsterPictureType(int monsterType)
     return monsterType;
 }
 main();
+if(playGame == false && playerHp <= 0)
+{
+    Console.WriteLine("You have been defeated");
+}
+
+// Change Equipment
+void changeEquipment()
+{
+
+    int equipmentChoice;
+    for(int i = 0; i < backPack.Length; i ++)
+    {
+        Console.WriteLine($"{i}: {backPack[i].name}");
+    }
+
+    bool successEquipmentChoice = int.TryParse(Console.ReadLine(), out equipmentChoice);
+    equippedWeapon = backPack[equipmentChoice];
+}
+
+//Rooms
+void shop()
+{
+    string [] merchantRows = File.ReadAllLines("merchant.txt");
+    char[][] merchantChar = merchantRows.Select(items => items.ToArray()).ToArray();
+    Console.Clear();
+    int temp_x = 0;
+    while(temp_x< 1)
+    {
+        string temp_row = "";
+        for(int i = 0; i<merchantRows[0].Length; i++)
+        {
+            temp_row += merchantChar[temp_x][i];
+        }
+        Console.WriteLine(temp_row);
+        temp_x++;
+    }
+    
+}
+void TresureRoom()
+{
+    Console.Clear();
+    Console.WriteLine("This is the treasuer room");
+}
+void ItemDropRoom()
+{
+    Console.Clear();
+    Console.WriteLine("This room will drop an item");
+}
+void TrapRoom()
+{
+    Console.Clear();
+    Console.WriteLine("It's a TRAP!!");
+}
+void MiniBoss()
+{
+    Console.Clear();
+    Console.WriteLine("This is a mini Boss room");
+}
+//Inventory Printer
+void PrintInventory()
+{
+
+    for(int i = 0; i < backPack.Length; i++)
+    {
+        Console.WriteLine($"{backPack[i].name}");
+    }
+}
+
+//Dungeon Creator
+void randRoomGenerator()
+{
+    numberOfRooms++;
+    if(numberOfRooms == maxRooms)
+    {
+        numberOfRooms = 0;
+        dungeonLevel ++;
+        bossRoom = true;
+    }
+    int randRoom = rand.Next(1,7);
+    if(randRoom == 1)
+    {
+        shop();
+    }
+    else if(randRoom == 2)
+    {
+        TresureRoom();
+    }
+    else if(randRoom == 3)
+    {
+        ItemDropRoom();
+    }
+    else if(randRoom == 4)
+    {
+        combat();
+    }
+    else if(randRoom == 5)
+    {
+        TrapRoom();
+    }
+    else if(randRoom == 6)
+    {
+        MiniBoss();
+    }
+}
+void RoomZero()
+{
+
+}
 class Items
 {
     public string name;
     public int level;
     public int damageDie;
     public int attackBonus;
+    public int raiseShieldBonus;
     public int damageBouns;
     
 }
