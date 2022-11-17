@@ -16,8 +16,8 @@ int rollDie(int dice)
 }
 
 //Dungeon Creator Variables//
-int dungeonLevel = 0;
-int roomNumber = 0;
+int dungeonLevel = 4;
+int roomNumber = 4;
 int numberOfRooms = 0;
 int maxRooms = 10;
 int maxDungeonLevels = 4;
@@ -67,13 +67,23 @@ while(playGame)
 
 
 //Items
+Items magicSword = new Items();
+magicSword.name = "Magic Sword";
+magicSword.level = 2;
+magicSword.attackBonus = 7;
+magicSword.damageDie = dEight;
+
+Items magicShield = new Items();
+magicShield.name = "Holy Shield";
+magicShield.level = 2;
+magicShield.attackBonus = 7;
+magicShield.raiseShieldBonus = 5;
+
 Items shield = new Items();
 shield.name = "Shield";
 shield.level = 1;
 shield.attackBonus = 5;
 shield.raiseShieldBonus = 3;
-
-
 
 Items sword = new Items();
 sword.name = "Sword";
@@ -86,6 +96,8 @@ emptySlot.name = "[Empty Slot]";
 
 Items healthPotion = new Items();
 healthPotion.name = "Health Potion";
+healthPotion.healBonus = 10;
+
 
 
 
@@ -95,7 +107,7 @@ int monsterLevel = monsterType(dungeonLevel, roomNumber);
 int monsterIntiative = monstInti + monsterLevel;
 int monsterHitPoints = monsterType(dungeonLevel, roomNumber) * 10;
 int monsterAC = 10 + monsterType(dungeonLevel, roomNumber) * 2;
-int monsterAttackDamage = 5;
+int monsterAttackDamage = 0;
 
 //Player
 var equippedWeapon = sword;
@@ -109,7 +121,6 @@ Items [] backPack = new Items[inventoryCount];
 int playerHp = hitPoints + Playerlevel * 2;
 int playerIntiative = 10 + Playerlevel;
 int playerAttackBonus = Playerlevel + equippedWeapon.level;
-int playerAC = 10 + Playerlevel + equippedShield.attackBonus;
 for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
@@ -126,6 +137,10 @@ void combat()
     string monsterPic = $"monster{monsterPicNumber}.txt";
     string [] monsterRows = File.ReadAllLines($"{monsterPic}");
     char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
+    int temp_monsterHp = monsterHitPoints;
+
+    //Values declared in Combat//
+    int playerAC = 10 + Playerlevel + equippedShield.attackBonus;
 
     bool determineHit(int targetAC, int attackBonus)
     {
@@ -169,27 +184,53 @@ void combat()
             while(makeAChoice)
             {
             printKnight();
-            
-            
                 Console.WriteLine($"Hit Points: {playerHp}");
                 Console.WriteLine($"AC:{temp_playerAC}");
                 Console.WriteLine("(1) Attack! (2) Use Item (3) Raise Shield (4) Run Away!!");
                 int choice;
                 int damageDealt = Playerdamage();
                 bool successChoice = int.TryParse(Console.ReadLine(), out choice);
+                int numberEmptySlots = 0;
+                bool allEmpty = false;
+                bool CheckingInventory = false;
                 if(successChoice != true || choice > 4 || choice <= 0)
                 {
                     Console.WriteLine("That is not a valid choice, press enter and try again.");
                     Console.ReadLine();
                     continue;
                 }
+                //Checking if inventory is empty or not//
+                for(int testingInventorySlots = 0; testingInventorySlots < inventoryCount; testingInventorySlots++)
+                {
+                    if(backPack[testingInventorySlots] == emptySlot)
+                    {
+                        numberEmptySlots++;
+                    }
+                }
+                if(numberEmptySlots == inventoryCount)
+                {
+                    allEmpty = true;
+                }
+                if(choice == 2 && allEmpty)
+                {
+                    Console.WriteLine("Your inventory is empty, choose a different action");
+                    Console.ReadLine();
+                    CheckingInventory = true;
+                }
+                else if(allEmpty == false)
+                {
+                    CheckingInventory = false;
+                }
+                
+                while(CheckingInventory == false)
+                {
                 switch(choice)
                 {
                     case 1:
                         if(determineHit(temp_MonsterAC,equippedWeapon.attackBonus ))
                         {
                             Console.WriteLine("You Hit!!");
-                            monsterHitPoints -= damageDealt;
+                            temp_monsterHp -= damageDealt;
                             temp_MonsterAC -= damageDealt;
                             Console.ReadLine();
                         }
@@ -199,28 +240,103 @@ void combat()
                             Console.WriteLine("You missed!");
                             Console.ReadLine();
                         }
+                        CheckingInventory = true;
                         makeAChoice = false;
+                        monsterTurn = true;
                         break;
                     case 2:
                         Console.Clear();
                         PrintInventory();
-                        Console.ReadLine();
+                        bool useInventory = true;
+                        int inventoryChoice = 0;
+                        int ammountOfFailedChoicesMade = 0;
+                        bool usingItem = false;
+                        while(useInventory)
+                        {
+
+                            bool successInventroySelect = int.TryParse(Console.ReadLine(), out inventoryChoice);
+                            
+                            if(successInventroySelect == true && inventoryChoice < backPack.Length && inventoryChoice > 0)
+                            {
+                                inventoryChoice--;
+                                useInventory = false;
+                                usingItem = true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("That is not a valid selection");
+                            }
+                        }   
+                        while(usingItem == true)
+                        {
+
+                            if(ammountOfFailedChoicesMade >= 5)
+                            {
+                                Console.WriteLine("You have taken too long, this is your last chance before your turn ends");
+                                useInventory = false;
+                                usingItem = false;
+                            }
+                            if(backPack[inventoryChoice] == healthPotion)
+                            {
+                                playerHp += healthPotion.healBonus;
+                                backPack[inventoryChoice] = emptySlot;
+                                useInventory = false;
+                                usingItem = false;
+                                Console.WriteLine($"You heal {healthPotion.healBonus} points");
+                            }
+                            else if(backPack[inventoryChoice] == emptySlot)
+                            {
+                                Console.WriteLine("That is an empty slot please make a different selection");
+                                ammountOfFailedChoicesMade ++;
+                            }
+                        }
+                            Console.ReadLine();
+                        
+                        CheckingInventory = true;
                         makeAChoice = false;
+                        monsterTurn = true;
                         break;
                     case 3: 
                         temp_playerAC += shield.raiseShieldBonus *2;
                         Console.WriteLine("Your shield is raised, making it easier to deflect attacks");
                         Console.ReadLine();
+                        CheckingInventory = true;
                         makeAChoice = false;
+                        monsterTurn = true;
                         break;
                     case 4:
+                        if(fledBattle(rollDie(dTwenty)))
+                        {
+                            if(playerHp % 2 == 0)
+                            {
+                                playerHp = playerHp/2;
+                            }
+                            else if(playerHp % 2 != 0)
+                            {
+                                int temp_PlayerHp = playerHp +1;
+                                playerHp = temp_PlayerHp/2;
+                            }
+                            Console.WriteLine("You don't come away without injury but you escape");
+                            Console.WriteLine($"Your current Hit Points: {playerHp}");
+                            CheckingInventory = true;
+                            makeAChoice = false;
+                            monsterTurn = false;
+                            fight = false;
+                        }
+                        else
+                        {
+                        CheckingInventory = true;
                         makeAChoice = false;
+                        monsterTurn = false;
+                        fight = false;
+                        Console.WriteLine("You flee the battle unscathed");
+                        }
                         break;
 
                 }
+                }
             }
             playerTurn = false;
-            monsterTurn = true;
             
 
 
@@ -228,10 +344,10 @@ void combat()
         while(monsterTurn)
         {
             printMonster();
-            Console.WriteLine($"HP: {monsterHitPoints}");
+            Console.WriteLine($"HP: {temp_monsterHp}");
             bool hit = determineHit(temp_playerAC, monsterLevel*2);
             int monsterDamageDealt = MonsterDamage();
-            if(monsterHitPoints <= 0)
+            if(temp_monsterHp <= 0)
             {
                 fight = false;
                 Console.WriteLine("You have defeated the foe!!");
@@ -309,6 +425,17 @@ if(playGame == false && playerHp <= 0)
     Console.WriteLine("You have been defeated");
 }
 
+
+
+bool fledBattle(int randDieRoll)
+{
+    if(randDieRoll < 10)
+    {
+        return true;
+    }
+    return false;
+}
+
 // Change Equipment
 void changeEquipment()
 {
@@ -346,6 +473,24 @@ void TresureRoom()
 {
     Console.Clear();
     Console.WriteLine("This is the treasuer room");
+    if(equippedWeapon != magicSword)
+    {
+        equippedWeapon = magicSword;
+        Console.WriteLine($"You have found a {magicSword.name}");
+    }
+    else if(equippedWeapon == magicSword)
+    {
+        if(equippedShield != magicShield)
+        {
+            equippedShield = magicShield;
+            Console.WriteLine($"You have a found a {magicShield.name}!");
+        }   
+    }
+
+    if(equippedShield == magicShield && equippedWeapon == magicSword)
+    {
+        goldCount += 10;
+    }
 }
 void ItemDropRoom()
 {
@@ -362,6 +507,12 @@ void MiniBoss()
     Console.Clear();
     Console.WriteLine("This is a mini Boss room");
 }
+void boss_Room()
+{
+    Console.Clear();
+    Console.WriteLine("This is the boss room");
+}
+
 //Inventory Printer
 void PrintInventory()
 {
@@ -375,7 +526,6 @@ void PrintInventory()
 //Dungeon Creator
 void randRoomGenerator()
 {
-    numberOfRooms++;
     if(numberOfRooms == maxRooms)
     {
         numberOfRooms = 0;
@@ -383,30 +533,43 @@ void randRoomGenerator()
         bossRoom = true;
     }
     int randRoom = rand.Next(1,7);
-    if(randRoom == 1)
+    if(bossRoom == true)
     {
-        shop();
+        boss_Room();
+        bossRoom = false;
     }
-    else if(randRoom == 2)
+    else if(bossRoom != true)
     {
-        TresureRoom();
+        numberOfRooms++;
+        if(randRoom == 1)
+            {
+                shop();
+            }
+        else if(randRoom == 2)
+            {
+                TresureRoom();
+            }
+        else if(randRoom == 3)
+            {
+                ItemDropRoom();
+            }
+        else if(randRoom == 4)
+            {
+                combat();
+            }
+        else if(randRoom == 5)
+            {
+                TrapRoom();
+            }
+        else if(randRoom == 6)
+            {
+                MiniBoss();
+                Console.WriteLine(dungeonLevel);
+                Console.WriteLine(numberOfRooms);
+            }
+
     }
-    else if(randRoom == 3)
-    {
-        ItemDropRoom();
-    }
-    else if(randRoom == 4)
-    {
-        combat();
-    }
-    else if(randRoom == 5)
-    {
-        TrapRoom();
-    }
-    else if(randRoom == 6)
-    {
-        MiniBoss();
-    }
+    
 }
 void RoomZero()
 {
@@ -420,5 +583,6 @@ class Items
     public int attackBonus;
     public int raiseShieldBonus;
     public int damageBouns;
+    public int healBonus;
     
 }
