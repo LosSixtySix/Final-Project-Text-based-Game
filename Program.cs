@@ -474,43 +474,51 @@ void changeEquipment()
 //Rooms
 void shop()
 {
-    string [] merchantRows = File.ReadAllLines("merchant.txt");
-    char[][] merchantChar = merchantRows.Select(items => items.ToArray()).ToArray();
-    Console.Clear();
-    int temp_x = 0;
-    while(temp_x< 1)
-    {
-        string temp_row = "";
-        for(int i = 0; i<merchantRows[0].Length; i++)
-        {
-            temp_row += merchantChar[temp_x][i];
-        }
-        Console.WriteLine(temp_row);
-        temp_x++;
-    }
     bool shopping = true;
     while(shopping)
     {
-    bool checkingChoice = true;
-    int buyOrSell;
-    bool successBuy = int.TryParse(Console.ReadLine(), out buyOrSell);
+        string [] merchantRows = File.ReadAllLines("merchant.txt");
+        char[][] merchantChar = merchantRows.Select(items => items.ToArray()).ToArray();
+        Console.Clear();
+        int temp_x = 0;
+        while(temp_x< 1)
+        {
+            string temp_row = "";
+            for(int i = 0; i<merchantRows[0].Length; i++)
+            {
+                temp_row += merchantChar[temp_x][i];
+            }
+            Console.WriteLine(temp_row);
+            temp_x++;
+        }
+        Console.Write("1: Buy ");
+        Console.Write("2: Sell ");
+        Console.Write("3: Exit");
+        Console.WriteLine();
+        bool checkingChoice = true;
+        int buyOrSell;
+        bool successBuy = int.TryParse(Console.ReadLine(), out buyOrSell);
         while(checkingChoice)
         {
-            if(successBuy)
+            if(successBuy && buyOrSell <= 3 && buyOrSell > 0)
             {
                 switch(buyOrSell)
                 {
                     case 1:
                         Console.WriteLine("You are buying");
                         Console.ReadLine();
+                        checkingChoice = false;
                         break;
                     case 2:
                         Console.WriteLine("You are selling");
                         Console.ReadLine();
+                        checkingChoice = false;
                         break;
                     case 3:
                         Console.WriteLine("Exiting");
                         Console.ReadLine();
+                        checkingChoice = false;
+                        shopping = false;
                         break;
 
                 }
@@ -519,6 +527,7 @@ void shop()
             else
             {
                 Console.WriteLine("That is not a valid option try again");
+                checkingChoice= false;
             }
         }
     }
