@@ -96,7 +96,28 @@ emptySlot.name = "[Empty Slot]";
 
 Items healthPotion = new Items();
 healthPotion.name = "Health Potion";
-healthPotion.healBonus = 10;
+healthPotion.healBonus = 5;
+healthPotion.goldValue = 5;
+
+Items greaterHealthPotion = new Items();
+greaterHealthPotion.name = "Greater Health Potion";
+greaterHealthPotion.healBonus = 10;
+greaterHealthPotion.goldValue = 15;
+
+Items expertHealthPotion = new Items();
+expertHealthPotion.name = "Expert Health Potion";
+expertHealthPotion.healBonus = 15;
+expertHealthPotion.goldValue = 25;
+
+Items throwingDagger = new Items();
+throwingDagger.goldValue = 5;
+
+Items bomb = new Items();
+bomb.name = "Bomb";
+bomb.goldValue = 15;
+
+List<Items> merchantPullList = new List<Items>(){healthPotion, greaterHealthPotion, expertHealthPotion, throwingDagger, bomb};
+
 
 
 
@@ -467,6 +488,41 @@ void shop()
         Console.WriteLine(temp_row);
         temp_x++;
     }
+    bool shopping = true;
+    while(shopping)
+    {
+    bool checkingChoice = true;
+    int buyOrSell;
+    bool successBuy = int.TryParse(Console.ReadLine(), out buyOrSell);
+        while(checkingChoice)
+        {
+            if(successBuy)
+            {
+                switch(buyOrSell)
+                {
+                    case 1:
+                        Console.WriteLine("You are buying");
+                        Console.ReadLine();
+                        break;
+                    case 2:
+                        Console.WriteLine("You are selling");
+                        Console.ReadLine();
+                        break;
+                    case 3:
+                        Console.WriteLine("Exiting");
+                        Console.ReadLine();
+                        break;
+
+                }
+
+            }
+            else
+            {
+                Console.WriteLine("That is not a valid option try again");
+            }
+        }
+    }
+    
     
 }
 void TresureRoom()
@@ -584,5 +640,6 @@ class Items
     public int raiseShieldBonus;
     public int damageBouns;
     public int healBonus;
+    public int goldValue;
     
 }
