@@ -267,7 +267,7 @@ void combat()
                         break;
                     case 2:
                         Console.Clear();
-                        PrintInventory();
+                        PrintInventory(backPack);
                         bool useInventory = true;
                         int inventoryChoice = 0;
                         int ammountOfFailedChoicesMade = 0;
@@ -579,10 +579,10 @@ void boss_Room()
 }
 
 //Inventory Printer
-void PrintInventory()
+void PrintInventory(Items[] x)
 {
 
-    for(int i = 0; i < backPack.Length; i++)
+    for(int i = 0; i < x.Length; i++)
     {
         Console.WriteLine($"{backPack[i].name}");
     }
