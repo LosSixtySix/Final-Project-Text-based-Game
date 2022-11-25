@@ -113,6 +113,17 @@ Items bomb = new Items();
 bomb.name = "Bomb";
 bomb.goldValue = 15;
 
+Items throwingAxe = new Items();
+throwingAxe.name = "Throwing Axe";
+throwingAxe.goldValue = 10;
+throwingAxe.damageDie = dTen;
+
+Items bigBackPack = new Items();
+bigBackPack.name = "Big Back Pack";
+bigBackPack.goldValue = 15;
+bigBackPack.inventorySlotsBonus =3;
+
+List<Items> itemRoomPullList = new List<Items>(){throwingDagger, throwingDagger, throwingDagger, healthPotion, healthPotion, healthPotion, healthPotion, healthPotion, healthPotion, throwingAxe, expertHealthPotion, greaterHealthPotion, greaterHealthPotion, greaterHealthPotion, bomb };
 List<Items> treasureRoomPullList = new List<Items>(){magicShield, magicSword, bootsofSpeed};
 
 List<Items> merchantPullList = new List<Items>(){healthPotion, greaterHealthPotion, expertHealthPotion, throwingDagger, bomb};
@@ -157,6 +168,7 @@ List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
 List<Monsters> listOfMonstersLevelThree = new List<Monsters>(){minotaur};
 
 //Player
+Items equippedBackPack = emptySlot;
 Items equippedGloves = emptySlot;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
@@ -175,8 +187,8 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
 }
-backPack.SetValue(bomb, 0);
-backPack.SetValue(throwingDagger, 1);
+backPack.SetValue(throwingAxe, 0);
+backPack.SetValue(expertHealthPotion, 1);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -357,11 +369,11 @@ void combat()
                             }
                             if(ChosenItem.name.Contains("Health"))
                             {
-                                playerHp += backPack[inventoryChoice].healBonus;
+                                playerHp += ChosenItem.healBonus;
                                 backPack[inventoryChoice] = emptySlot;
                                 useInventory = false;
                                 usingItem = false;
-                                Console.WriteLine($"You heal {backPack[inventoryChoice].healBonus} points");
+                                Console.WriteLine($"You heal {ChosenItem.healBonus} points");
                             }
                             if(ChosenItem.name.Contains("Throwing"))
                             {
@@ -814,36 +826,127 @@ void shop()
 void TresureRoom()
 {
     Console.Clear();
-    Console.WriteLine("This is the treasuer room");
+        Console.WriteLine("You stumble upon an old armory room, there may be something useful to use in here....");
+        Console.WriteLine("Press enter to continue");
+        Console.ReadLine();
     if(treasureRoomPullList.Count > 0)
     {
-        int randoDrop = rand.Next(1, treasureRoomPullList.Count + 1);
+        int randoDrop = rand.Next(0, treasureRoomPullList.Count);
         Items droppedItem = treasureRoomPullList[randoDrop];
         if(droppedItem == magicShield)
         {
             equippedShield = magicShield;
+            Console.WriteLine("You have found a Holy Shield");
             treasureRoomPullList.Remove(magicShield);
         }
         if(droppedItem == magicSword)
         {
             equippedWeapon = droppedItem;
+            Console.WriteLine("You have picked up a Magic Sword");
             treasureRoomPullList.Remove(droppedItem);
         }
         if(droppedItem == bootsofSpeed)
         {
             equippedBoots = droppedItem;
+            Console.WriteLine("You have found a pair of Boots of Speed");
             treasureRoomPullList.Remove(droppedItem);
         }
     }
     else if(equippedShield == magicShield && equippedWeapon == magicSword && equippedBoots == bootsofSpeed)
     {
-        goldCount += 10 + (dungeonLevel * 5);
+        int gainedGold = 10 + (dungeonLevel * 5) + rollDie(dEight);
+        Console.WriteLine("You don't manage to find anything better than what you are already using, but you do manage to pick up some gold.");
+        Console.WriteLine($"You find {gainedGold} gold coins");
+        goldCount += gainedGold;
     }
 }
 void ItemDropRoom()
 {
     Console.Clear();
     Console.WriteLine("This room will drop an item");
+    int randoDrop = rand.Next(0, itemRoomPullList.Count);
+    Items droppedItem = itemRoomPullList[randoDrop];
+    Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
+    int decisionsMade = 0;
+    bool makingDecision = true;
+    while(makingDecision)
+    {
+        string? terminalInput = Console.ReadLine();
+        int pickingUpItemInt;
+        bool successDecision = int.TryParse(terminalInput, out pickingUpItemInt);
+        if(successDecision)
+        {
+            Console.WriteLine("That is not a valid decision, try again.");
+            Console.ReadLine();
+            decisionsMade ++;
+            if(decisionsMade >= 6)
+            {
+                Console.WriteLine("As you stand there attempting to decide you hear a low growl from behind you, you quickly turn to find a monster standing there. Press enter to continue");
+                Console.ReadLine();
+                combat();
+                makingDecision = false;
+            }
+        }
+        else if(successDecision == false)
+        {
+            string? decisionMade = terminalInput;
+
+            if(decisionMade.ToLower() == "y")
+            {
+                bool choosingSlot = true;
+                int slotChoicesMade = 0;
+                while(choosingSlot)
+                {
+
+                    PrintInventory(backPack);
+                    Console.WriteLine("Which slot would you like to put it in?");
+                    int slotChoice;
+                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                    if(successChoice && slotChoice< backPack.Length)
+                    {
+                        backPack[slotChoice]= droppedItem;
+                        Console.WriteLine($"You have succesfully picked up {droppedItem}. Press enter to continue");
+                        choosingSlot = false;
+                        makingDecision = false;
+                    }
+                    else if(successChoice == false || slotChoice >= backPack.Length)
+                    {
+                        Console.WriteLine("That is not a valid choice, try again");
+                        Console.ReadLine();
+                        slotChoicesMade ++;
+                        if(slotChoicesMade >= 6)
+                        {
+                            Console.WriteLine("As you stand there attempting to decide you hear a low growl from behind you, you quickly turn to find a monster standing there. Press enter to continue");
+                            Console.ReadLine();
+                            combat();
+                            makingDecision = false;
+                            choosingSlot = false;
+
+                        }
+                    }
+                }
+            }
+            else if(decisionMade.ToLower() == "n")
+            {
+                Console.WriteLine("You decide it isn't worth keeping and move on. Press enter to continue.");
+                makingDecision= false;
+            }
+            else
+            {
+                Console.WriteLine("That is not a valid choice, try agian.");
+                decisionsMade ++;
+                if(decisionsMade >= 6)
+                {
+                    Console.WriteLine("As you stand there attempting to decide you hear a low growl from behind you, you quickly turn to find a monster standing there. Press enter to continue");
+                    Console.ReadLine();
+                    combat();
+                    makingDecision = false;
+
+                }
+
+            }
+        }
+    }
 }
 void TrapRoom()
 {
@@ -1004,6 +1107,7 @@ while(playGame)
     Console.WriteLine("Press Enter to Start");
     Console.ReadLine();
     RoomZero();
+    Console.ReadLine();
     while(numberOfRooms <= maxRooms && playGame)
     {
         randRoomGenerator();
@@ -1030,7 +1134,7 @@ while(playGame)
 }
 class Monsters
 {
-    public string name;
+    public string? name;
     public int level;
     public int MonsterIntiative;
     public int MonsterHitPoints;
@@ -1039,7 +1143,8 @@ class Monsters
 }
 class Items
 {
-    public string name;
+    public int inventorySlotsBonus;
+    public string? name;
     public int level;
     public int damageDie;
     public int attackBonus;
