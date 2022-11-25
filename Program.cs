@@ -3,12 +3,15 @@
 Console.Clear();
 
 //Variables//
+bool hardCoreMode = false;
 Random rand = new Random();
 int dTwenty = 21;
 int dEight = 9;
 int dSix = 7;
 int dFour = 5;
 int dFive = 6;
+int dTen = 11;
+int dThree = 4;
 bool playGame = true;
 
 int rollDie(int dice)
@@ -17,8 +20,8 @@ int rollDie(int dice)
 }
 
 //Dungeon Creator Variables//
-int dungeonLevel = 4;
-int roomNumber = 4;
+int dungeonLevel = 1;
+int roomNumber = 0;
 int numberOfRooms = 0;
 int maxRooms = 10;
 int maxDungeonLevels = 4;
@@ -47,27 +50,14 @@ void printCastle()
 
 //Game Start//
 
-void main()
-{
-while(playGame)
-{
-    printCastle();
-    Console.WriteLine("The Castle of Terath");
-    Console.WriteLine("Press Enter to Start");
-    Console.ReadLine();
-    RoomZero();
-    while(numberOfRooms <= maxRooms && playGame)
-    {
-        randRoomGenerator();
-        Console.WriteLine("Press Enter to continue");
-        Console.ReadLine();
-    }
-}
 
-}
 
 
 //Items
+Items bootsofSpeed = new Items();
+bootsofSpeed.name = "Boots of Speed";
+bootsofSpeed.intiativeBonus = 5;
+
 Items magicSword = new Items();
 magicSword.name = "Magic Sword";
 magicSword.level = 2;
@@ -92,6 +82,10 @@ sword.level = 1;
 sword.attackBonus = 1 + sword.level * 2;
 sword.damageDie = dSix;
 
+Items wornBoots = new Items();
+wornBoots.name = "Worn Boots";
+wornBoots.intiativeBonus = 0;
+
 Items emptySlot = new Items();
 emptySlot.name = "[Empty Slot]";
 
@@ -112,11 +106,14 @@ expertHealthPotion.goldValue = 25;
 
 Items throwingDagger = new Items();
 throwingDagger.name = "Throwing Dagger";
+throwingDagger.damageDie = dSix;
 throwingDagger.goldValue = 5;
 
 Items bomb = new Items();
 bomb.name = "Bomb";
 bomb.goldValue = 15;
+
+List<Items> treasureRoomPullList = new List<Items>(){magicShield, magicSword, bootsofSpeed};
 
 List<Items> merchantPullList = new List<Items>(){healthPotion, greaterHealthPotion, expertHealthPotion, throwingDagger, bomb};
 Items[] shopList = new Items[5];
@@ -129,23 +126,41 @@ for(int shopListPlace = 0; shopListPlace < shopList.Length; shopListPlace++)
 
 
 
-//Monster
+//Monsters//
+
+Monsters skeleton = new Monsters();
+skeleton.name = "Skeleton";
+skeleton.level = 1;
+skeleton.MonsterAC = 15;
+skeleton.MonsterAttackDamage = 1;
+skeleton.MonsterIntiative = 3;
+skeleton.MonsterHitPoints = 5;
+
+Monsters rat = new Monsters();
+rat.name = "Dire Rat";
+rat.level = 1;
+rat.MonsterAC = 10;
+rat.MonsterAttackDamage = 5;
+rat.MonsterIntiative = 6;
+rat.MonsterHitPoints = 3;
 
 Monsters minotaur = new Monsters();
 minotaur.name = "Minotaur";
 minotaur.level = 1;
 minotaur.MonsterAC = 12;
 minotaur.MonsterAttackDamage = 2;
-minotaur.MonsterIntiative = 6;
+minotaur.MonsterIntiative = 4;
 minotaur.MonsterHitPoints = 10;
 
-List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur};
+List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur, skeleton, skeleton, skeleton, rat, rat, rat, rat, rat, rat};
 List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
 List<Monsters> listOfMonstersLevelThree = new List<Monsters>(){minotaur};
 
 //Player
-var equippedWeapon = sword;
-var equippedShield = shield;
+Items equippedGloves = emptySlot;
+Items equippedBoots = wornBoots;
+Items equippedWeapon = sword;
+Items equippedShield = shield;
 int goldCount = 0;
 int hitPoints = 10;
 int Playerlevel = 1;
@@ -153,13 +168,15 @@ int experience = 0;
 int inventoryCount = 5;
 Items [] backPack = new Items[inventoryCount];
 int playerHp = hitPoints + Playerlevel * 2;
-int playerIntiative = 10 + Playerlevel;
+int playerMaxHP = hitPoints + Playerlevel *2;
+int playerIntiative = 10 + Playerlevel + equippedBoots.intiativeBonus;
 int playerAttackBonus = Playerlevel + equippedWeapon.level;
 for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
 }
-backPack.SetValue(healthPotion, 0);
+backPack.SetValue(bomb, 0);
+backPack.SetValue(throwingDagger, 1);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -170,7 +187,8 @@ void combat()
     Monsters ChosenMonster = listOfMonstersLevelOne[0];
     if(dungeonLevel == 1)
     {
-        ChosenMonster = listOfMonstersLevelOne[0]; 
+        int randoMonster = rollDie(dTen - 1);
+        ChosenMonster = listOfMonstersLevelOne[randoMonster]; 
     }
     else if(dungeonLevel == 2)
     {
@@ -310,6 +328,7 @@ void combat()
                         int inventoryChoice = 0;
                         int ammountOfFailedChoicesMade = 0;
                         bool usingItem = false;
+                        Items ChosenItem = emptySlot;
                         while(useInventory)
                         {
 
@@ -320,6 +339,7 @@ void combat()
                                 inventoryChoice--;
                                 useInventory = false;
                                 usingItem = true;
+                                ChosenItem = backPack[inventoryChoice];
                             }
                             else
                             {
@@ -335,15 +355,31 @@ void combat()
                                 useInventory = false;
                                 usingItem = false;
                             }
-                            if(backPack[inventoryChoice] == healthPotion)
+                            if(ChosenItem.name.Contains("Health"))
                             {
-                                playerHp += healthPotion.healBonus;
+                                playerHp += backPack[inventoryChoice].healBonus;
                                 backPack[inventoryChoice] = emptySlot;
                                 useInventory = false;
                                 usingItem = false;
-                                Console.WriteLine($"You heal {healthPotion.healBonus} points");
+                                Console.WriteLine($"You heal {backPack[inventoryChoice].healBonus} points");
                             }
-                            else if(backPack[inventoryChoice] == emptySlot)
+                            if(ChosenItem.name.Contains("Throwing"))
+                            {
+                                temp_monsterHp -= ChosenItem.damageDie;
+                                backPack[inventoryChoice] = emptySlot;
+                                useInventory = false;
+                                usingItem = false;
+                                Console.WriteLine($"You use a {ChosenItem.name} on {ChosenMonster.name}");
+                            }
+                            if(ChosenItem.name.Contains("Bomb"))
+                            {
+                                temp_monsterHp -= ChosenMonster.MonsterHitPoints;
+                                backPack[inventoryChoice] = emptySlot;
+                                useInventory = false;
+                                usingItem = false;
+                                Console.WriteLine($"You use a {ChosenItem.name} on {ChosenMonster.name}");
+                            }
+                            else if(ChosenItem == emptySlot)
                             {
                                 Console.WriteLine("That is an empty slot please make a different selection");
                                 ammountOfFailedChoicesMade ++;
@@ -458,16 +494,16 @@ void combat()
     void printMonster()
     {
         Console.Clear();
-        int temp_x = 0;
-        while(temp_x < 23)
+        int temp_y = 0;
+        while(temp_y < 23)
         {
             string temp_row ="";
-            for(int i = 0; i < monsterRows[12].Length; i++)
+            for(int i = 0; i < monsterRows[0].Length; i++)
             {
-                temp_row += monsterChar[temp_x][i];
+                temp_row += monsterChar[temp_y][i];
             }
             Console.WriteLine(temp_row);
-            temp_x++;
+            temp_y++;
         }
 
     }
@@ -475,6 +511,18 @@ void combat()
 }
 static int monsterType(string name)
 {
+    if(name == "Minotaur")
+    {
+        return 1;
+    }
+    else if(name == "Skeleton")
+    {
+        return 2;
+    }
+    else if(name == "Dire Rat")
+    {
+        return 3;
+    }
     return 1;
 }
 static int monsterPictureType(int monsterType)
@@ -767,23 +815,29 @@ void TresureRoom()
 {
     Console.Clear();
     Console.WriteLine("This is the treasuer room");
-    if(equippedWeapon != magicSword)
+    if(treasureRoomPullList.Count > 0)
     {
-        equippedWeapon = magicSword;
-        Console.WriteLine($"You have found a {magicSword.name}");
-    }
-    else if(equippedWeapon == magicSword)
-    {
-        if(equippedShield != magicShield)
+        int randoDrop = rand.Next(1, treasureRoomPullList.Count + 1);
+        Items droppedItem = treasureRoomPullList[randoDrop];
+        if(droppedItem == magicShield)
         {
             equippedShield = magicShield;
-            Console.WriteLine($"You have a found a {magicShield.name}!");
-        }   
+            treasureRoomPullList.Remove(magicShield);
+        }
+        if(droppedItem == magicSword)
+        {
+            equippedWeapon = droppedItem;
+            treasureRoomPullList.Remove(droppedItem);
+        }
+        if(droppedItem == bootsofSpeed)
+        {
+            equippedBoots = droppedItem;
+            treasureRoomPullList.Remove(droppedItem);
+        }
     }
-
-    if(equippedShield == magicShield && equippedWeapon == magicSword)
+    else if(equippedShield == magicShield && equippedWeapon == magicSword && equippedBoots == bootsofSpeed)
     {
-        goldCount += 10;
+        goldCount += 10 + (dungeonLevel * 5);
     }
 }
 void ItemDropRoom()
@@ -856,7 +910,7 @@ void randRoomGenerator()
         dungeonLevel ++;
         bossRoom = true;
     }
-    int randRoom = rand.Next(1,7);
+    int randRoom = rand.Next(1,15);
     if(bossRoom == true)
     {
         boss_Room();
@@ -873,15 +927,15 @@ void randRoomGenerator()
             {
                 TresureRoom();
             }
-        else if(randRoom == 3)
+        else if(randRoom == 3 || randRoom == 7 || randRoom == 8 || randRoom == 14)
             {
                 ItemDropRoom();
             }
-        else if(randRoom == 4)
+        else if(randRoom == 4 || randRoom == 11 || randRoom == 12 || randRoom == 13)
             {
                 combat();
             }
-        else if(randRoom == 5)
+        else if(randRoom == 5 || randRoom == 9 || randRoom == 10)
             {
                 TrapRoom();
             }
@@ -897,6 +951,81 @@ void randRoomGenerator()
 }
 void RoomZero()
 {
+
+}
+void main()
+{
+while(playGame)
+{
+    printCastle();
+    Console.WriteLine("The Castle of Terath");
+    Console.WriteLine("Would you like to play hard core mode? type y for yes or n for no.");
+    string? terminalInput = Console.ReadLine();
+    int hardCoreDecisionInt;
+    bool hardCoreDecisionSuccess = int.TryParse(terminalInput, out hardCoreDecisionInt);
+    if(hardCoreDecisionSuccess == false)
+    {
+        string? hardCoreDecision = terminalInput;
+        if(hardCoreDecision.ToLower() == "y")
+        {
+            hardCoreMode = true;
+        }
+        else if(hardCoreDecision.ToLower() == "n")
+        {
+            hardCoreMode = false;
+        }
+        else
+        {
+            Console.WriteLine("That is not a valid decision, hard core mode will be randomized......");
+            int randoHardMode = rand.Next(1, 3);
+            if(randoHardMode == 1)
+            {
+                hardCoreMode = true;
+            }
+            else if(randoHardMode == 2)
+            {
+                hardCoreMode = false;
+            }
+        }
+    }
+    if(hardCoreDecisionSuccess)
+    {
+        Console.WriteLine("That is not a valid decision, hard core mode will be randomized.......");
+            int randoHardMode = rand.Next(1, 3);
+            if(randoHardMode == 1)
+            {
+                hardCoreMode = true;
+            }
+            else if(randoHardMode == 2)
+            {
+                hardCoreMode = false;
+            }
+    }
+    Console.WriteLine("Press Enter to Start");
+    Console.ReadLine();
+    RoomZero();
+    while(numberOfRooms <= maxRooms && playGame)
+    {
+        randRoomGenerator();
+        Console.WriteLine("Press Enter to continue");
+        Console.ReadLine();
+        if(hardCoreMode == false)
+        {
+            if(playerHp +2< playerMaxHP)
+            {
+                Console.WriteLine("You rest a little and heal 2 HP");
+                Console.ReadLine();
+                playerHp += 2;
+            }
+            else if(playerHp +1 < playerMaxHP)
+            {
+                Console.WriteLine("You try to sleep in this gloomy place, but struggle to get comfortable. You still manage to heal 1 HP");
+                Console.ReadLine();
+                playerHp += 1;
+            }
+        }
+    }
+}
 
 }
 class Monsters
@@ -918,5 +1047,6 @@ class Items
     public int damageBouns;
     public int healBonus;
     public int goldValue;
+    public int intiativeBonus;
     
 }
