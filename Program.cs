@@ -8,6 +8,7 @@ int dTwenty = 21;
 int dEight = 9;
 int dSix = 7;
 int dFour = 5;
+int dFive = 6;
 bool playGame = true;
 
 int rollDie(int dice)
@@ -110,6 +111,7 @@ expertHealthPotion.healBonus = 15;
 expertHealthPotion.goldValue = 25;
 
 Items throwingDagger = new Items();
+throwingDagger.name = "Throwing Dagger";
 throwingDagger.goldValue = 5;
 
 Items bomb = new Items();
@@ -117,6 +119,11 @@ bomb.name = "Bomb";
 bomb.goldValue = 15;
 
 List<Items> merchantPullList = new List<Items>(){healthPotion, greaterHealthPotion, expertHealthPotion, throwingDagger, bomb};
+Items[] shopList = new Items[5];
+for(int shopListPlace = 0; shopListPlace < shopList.Length; shopListPlace++)
+{
+    shopList[shopListPlace] = emptySlot;
+}
 
 
 
@@ -133,7 +140,7 @@ int monsterAttackDamage = 0;
 //Player
 var equippedWeapon = sword;
 var equippedShield = shield;
-int goldCount = 0;
+int goldCount = 200;
 int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
@@ -472,8 +479,18 @@ void changeEquipment()
 }
 
 //Rooms
+
 void shop()
 {
+    int choicesMade = 0;
+    for(int i = 0; i < shopList.Length; i ++)
+    {
+        if(shopList[i] == emptySlot)
+        {
+            int randomItem = rollDie(dFive) - 1;
+            shopList[i] = merchantPullList[randomItem];
+        }
+    }
     bool shopping = true;
     while(shopping)
     {
@@ -491,35 +508,220 @@ void shop()
             Console.WriteLine(temp_row);
             temp_x++;
         }
-        Console.Write("1: Buy ");
-        Console.Write("2: Sell ");
-        Console.Write("3: Exit");
+        Console.Write("1: Exit");
+        PrintShopInventory(shopList);
         Console.WriteLine();
+        Console.Write($"You have {goldCount} gold pieces.");
         bool checkingChoice = true;
-        int buyOrSell;
-        bool successBuy = int.TryParse(Console.ReadLine(), out buyOrSell);
+        int buy;
+        bool successBuy = int.TryParse(Console.ReadLine(), out buy);
         while(checkingChoice)
         {
-            if(successBuy && buyOrSell <= 3 && buyOrSell > 0)
+            if(choicesMade >= 4)
             {
-                switch(buyOrSell)
+                shop();
+            }
+            if(successBuy && buy <= 6 && buy > 0)
+            {
+                switch(buy)
                 {
                     case 1:
-                        Console.WriteLine("You are buying");
-                        Console.ReadLine();
-                        checkingChoice = false;
-                        break;
-                    case 2:
-                        Console.WriteLine("You are selling");
-                        Console.ReadLine();
-                        checkingChoice = false;
-                        break;
-                    case 3:
                         Console.WriteLine("Exiting");
                         Console.ReadLine();
                         checkingChoice = false;
                         shopping = false;
                         break;
+                    case 2:
+                        if(AllEmpty(shopList))
+                        {
+                            Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
+                            checkingChoice = false;
+                            shopping = false;
+                        }
+                        if(shopList[0] == emptySlot)
+                        {
+                            Console.WriteLine("There is nothing to buy here");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                            break;
+                        }
+                        if(goldCount >= shopList[0].goldValue)
+                        {
+                            int checkingEmptySlotReturn = nextEmptySlot(backPack);
+                            if(checkingEmptySlotReturn < 100)
+                            {
+                                
+                                backPack[checkingEmptySlotReturn] = shopList[0];
+                                Console.WriteLine($"You have bought {shopList[0].name}.");
+                                goldCount -= shopList[0].goldValue;                                
+                                shopList[0] = emptySlot;
+                                Console.ReadLine();
+                                checkingChoice = false;
+                                choicesMade ++;
+                            }
+                        }
+                        else if(goldCount < shopList[0].goldValue)
+                        {
+                            Console.WriteLine("That Item costs too much");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                        }
+                        break;
+                    case 3:
+                        if(AllEmpty(shopList))
+                        {
+                            Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
+                            checkingChoice = false;
+                            shopping = false;
+                        }
+                        if(shopList[1] == emptySlot)
+                        {
+                            Console.WriteLine("There is nothing to buy here");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                            break;
+                        }
+                        if(goldCount >= shopList[1].goldValue)
+                        {
+                            int checkingEmptySlotReturn = nextEmptySlot(backPack);
+                            if(checkingEmptySlotReturn < 100)
+                            {
+                                
+                                backPack[checkingEmptySlotReturn] = shopList[1];
+                                Console.WriteLine($"You have bought {shopList[1].name}.");
+                                goldCount -= shopList[1].goldValue;                              
+                                shopList[1] = emptySlot;
+                                Console.ReadLine();
+                                choicesMade ++;
+                                checkingChoice = false;
+                            }
+                        }
+                        else if(goldCount < shopList[1].goldValue)
+                        {
+                            Console.WriteLine("That Item costs too much");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                        }
+                        break;
+                    case 4:
+                        if(AllEmpty(shopList))
+                        {
+                            Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
+                            checkingChoice = false;
+                            shopping = false;
+                        }
+                        if(shopList[2] == emptySlot)
+                        {
+                            Console.WriteLine("There is nothing to buy here");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                            break;
+                        }
+                        if(goldCount >= shopList[2].goldValue)
+                        {
+                            int checkingEmptySlotReturn = nextEmptySlot(backPack);
+                            if(checkingEmptySlotReturn < 100)
+                            {
+                                
+                                backPack[checkingEmptySlotReturn] = shopList[2];
+                                Console.WriteLine($"You have bought {shopList[2].name}.");
+                                goldCount -= shopList[2].goldValue;                                
+                                shopList[2] = emptySlot;
+                                Console.ReadLine();
+                                checkingChoice = false;
+                                choicesMade ++;
+                            }
+                        }
+                        else if(goldCount < shopList[2].goldValue)
+                        {
+                            Console.WriteLine("That Item costs too much");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                        }
+                        break;
+                    case 5:
+                        if(AllEmpty(shopList))
+                        {
+                            Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
+                            checkingChoice = false;
+                            shopping = false;
+                        }
+                        if(shopList[3] == emptySlot)
+                        {
+                            Console.WriteLine("There is nothing to buy here");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                            break;
+                        }
+                        if(goldCount >= shopList[3].goldValue)
+                        {
+                            int checkingEmptySlotReturn = nextEmptySlot(backPack);
+                            if(checkingEmptySlotReturn < 100)
+                            {
+                                
+                                backPack[checkingEmptySlotReturn] = shopList[3];
+                                Console.WriteLine($"You have bought {shopList[3].name}.");
+                                goldCount -= shopList[3].goldValue;                                
+                                shopList[3] = emptySlot;
+                                Console.ReadLine();
+                                checkingChoice = false;
+                                choicesMade ++;
+                            }
+                        }
+                        else if(goldCount < shopList[3].goldValue)
+                        {
+                            Console.WriteLine("That Item costs too much");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                        }
+                        break;
+                    case 6:
+                        if(AllEmpty(shopList))
+                        {
+                            Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
+                            checkingChoice = false;
+                            shopping = false;
+                        }
+                        if(shopList[4] == emptySlot)
+                        {
+                            Console.WriteLine("There is nothing to buy here");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                            break;
+                        }
+                        if(goldCount >= shopList[4].goldValue)
+                        {
+                            int checkingEmptySlotReturn = nextEmptySlot(backPack);
+                            if(checkingEmptySlotReturn < 100)
+                            {
+                                
+                                backPack[checkingEmptySlotReturn] = shopList[4];
+                                Console.WriteLine($"You have bought {shopList[4].name}.");
+                                goldCount -= shopList[4].goldValue;                                
+                                shopList[4] = emptySlot;
+                                Console.ReadLine();
+                                checkingChoice = false;
+                                choicesMade ++;
+                            }
+                        }
+                        else if(goldCount < shopList[4].goldValue)
+                        {
+                            Console.WriteLine("That Item costs too much");
+                            Console.ReadLine();
+                            checkingChoice = false;
+                            choicesMade ++;
+                        }
+                        break;
+
 
                 }
 
@@ -578,14 +780,44 @@ void boss_Room()
     Console.WriteLine("This is the boss room");
 }
 
-//Inventory Printer
+//Inventory Management 
 void PrintInventory(Items[] x)
 {
 
     for(int i = 0; i < x.Length; i++)
     {
-        Console.WriteLine($"{backPack[i].name}");
+        Console.WriteLine($"{x[i].name}");
     }
+}
+void PrintShopInventory(Items[] x)
+{
+        for(int i = 0; i < x.Length; i++)
+    {
+        Console.WriteLine();
+        Console.Write($"{i+2}: {x[i].name} ");
+        Console.Write($"{x[i].goldValue} gp");
+        
+    }
+}
+
+int nextEmptySlot(Items[] x)
+{
+    for(int i = 0;  i<x.Length; i ++)
+    {
+        if(x[i] == emptySlot)
+        {
+            return i;
+        }
+    }
+    return 100;
+}
+bool AllEmpty(Items[] x)
+{
+    if(x[0] == emptySlot && x[1] == emptySlot && x[2] == emptySlot && x[3] == emptySlot && x[4] == emptySlot)
+    {
+        return true;
+    }
+    return false;
 }
 
 //Dungeon Creator
