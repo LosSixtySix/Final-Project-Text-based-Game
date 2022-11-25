@@ -130,17 +130,23 @@ for(int shopListPlace = 0; shopListPlace < shopList.Length; shopListPlace++)
 
 
 //Monster
-int monstInti = monsterType(dungeonLevel, roomNumber) * 5;
-int monsterLevel = monsterType(dungeonLevel, roomNumber);
-int monsterIntiative = monstInti + monsterLevel;
-int monsterHitPoints = monsterType(dungeonLevel, roomNumber) * 10;
-int monsterAC = 10 + monsterType(dungeonLevel, roomNumber) * 2;
-int monsterAttackDamage = 0;
+
+Monsters minotaur = new Monsters();
+minotaur.name = "Minotaur";
+minotaur.level = 1;
+minotaur.MonsterAC = 12;
+minotaur.MonsterAttackDamage = 2;
+minotaur.MonsterIntiative = 6;
+minotaur.MonsterHitPoints = 10;
+
+List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur};
+List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
+List<Monsters> listOfMonstersLevelThree = new List<Monsters>(){minotaur};
 
 //Player
 var equippedWeapon = sword;
 var equippedShield = shield;
-int goldCount = 200;
+int goldCount = 0;
 int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
@@ -161,11 +167,24 @@ char[][] knightChar = knightRows.Select(items => items.ToArray()).ToArray();
 void combat()
 {
     // Determine monster type
-    string monsterPicNumber = monsterPictureType(monsterType(dungeonLevel, roomNumber)).ToString();
-    string monsterPic = $"monster{monsterPicNumber}.txt";
-    string [] monsterRows = File.ReadAllLines($"{monsterPic}");
-    char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
-    int temp_monsterHp = monsterHitPoints;
+    Monsters ChosenMonster = listOfMonstersLevelOne[0];
+    if(dungeonLevel == 1)
+    {
+        ChosenMonster = listOfMonstersLevelOne[0]; 
+    }
+    else if(dungeonLevel == 2)
+    {
+        ChosenMonster = listOfMonstersLevelTwo[0];
+    }
+    else if(dungeonLevel == 3)
+    {
+        ChosenMonster = listOfMonstersLevelThree[0];
+    }
+        string monsterPicNumber = monsterPictureType(monsterType(ChosenMonster.name)).ToString();
+        string monsterPic = $"monster{monsterPicNumber}.txt";
+        string [] monsterRows = File.ReadAllLines($"{monsterPic}");
+        char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
+        int temp_monsterHp = ChosenMonster.MonsterHitPoints;
 
     //Values declared in Combat//
     int playerAC = 10 + Playerlevel + equippedShield.attackBonus;
@@ -182,15 +201,27 @@ void combat()
     {
         return equippedWeapon.damageDie + equippedWeapon.damageBouns + playerAttackBonus;
     }
-    int MonsterDamage()
+    int MonsterDamage(Monsters x)
     {
-        return monsterLevel + monsterAttackDamage;
+        if(x.level == 1)
+        {
+            return x.level + x.MonsterAttackDamage + rollDie(dFour);
+        }
+        if(x.level == 2)
+        {
+            return x.level + x.MonsterAttackDamage + rollDie(dSix);
+        }
+        if(x.level == 3)
+        {
+            return x.level + x.MonsterAttackDamage + rollDie(dEight);
+        }
+        return x.level + x.MonsterAttackDamage + rollDie(dFour);
     }
 
     //Determine who goes first//
     bool playerTurn = false;
     bool monsterTurn = false;
-    if(playerIntiative > monsterIntiative)
+    if(playerIntiative > ChosenMonster.MonsterIntiative)
     {
         playerTurn = true;
     }
@@ -200,7 +231,7 @@ void combat()
     }
     bool fight = true;
     int temp_playerAC = playerAC;
-    int temp_MonsterAC = monsterAC;
+    int temp_MonsterAC = ChosenMonster.MonsterAC;
     while(fight)
     {
         
@@ -373,22 +404,26 @@ void combat()
         {
             printMonster();
             Console.WriteLine($"HP: {temp_monsterHp}");
-            bool hit = determineHit(temp_playerAC, monsterLevel*2);
-            int monsterDamageDealt = MonsterDamage();
+            bool hit = determineHit(temp_playerAC, ChosenMonster.level*2);
+            int monsterDamageDealt = MonsterDamage(ChosenMonster);
             if(temp_monsterHp <= 0)
             {
                 fight = false;
-                Console.WriteLine("You have defeated the foe!!");
+                Console.WriteLine($"You have defeated the {ChosenMonster.name}!!");
+                int goldGain = rollDie(dEight) + (ChosenMonster.level *4);
+                goldCount += goldGain;
+                Console.WriteLine($"You gained {goldGain} gold pieces");
+
             }
             else if(hit)
             {
-                Console.WriteLine("The monster hits you");
+                Console.WriteLine($"The {ChosenMonster.name} hits you");
                 playerHp -= monsterDamageDealt;
                 temp_playerAC -= monsterDamageDealt;
             }
             else if(hit == false)
             {
-                Console.WriteLine("The monster misses");
+                Console.WriteLine($"The {ChosenMonster.name} misses");
                 temp_playerAC -= monsterDamageDealt;
             }
             Console.ReadLine();
@@ -438,7 +473,7 @@ void combat()
     }
 
 }
-static int monsterType(int dungeonLevel, int roomNumber)
+static int monsterType(string name)
 {
     return 1;
 }
@@ -480,6 +515,8 @@ void changeEquipment()
 
 //Rooms
 
+
+///SHOP///
 void shop()
 {
     int choicesMade = 0;
@@ -543,7 +580,6 @@ void shop()
                             Console.WriteLine("There is nothing to buy here");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                             break;
                         }
                         if(goldCount >= shopList[0].goldValue)
@@ -566,7 +602,6 @@ void shop()
                             Console.WriteLine("That Item costs too much");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                         }
                         break;
                     case 3:
@@ -581,7 +616,6 @@ void shop()
                             Console.WriteLine("There is nothing to buy here");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                             break;
                         }
                         if(goldCount >= shopList[1].goldValue)
@@ -604,7 +638,6 @@ void shop()
                             Console.WriteLine("That Item costs too much");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                         }
                         break;
                     case 4:
@@ -619,7 +652,6 @@ void shop()
                             Console.WriteLine("There is nothing to buy here");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                             break;
                         }
                         if(goldCount >= shopList[2].goldValue)
@@ -642,7 +674,6 @@ void shop()
                             Console.WriteLine("That Item costs too much");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                         }
                         break;
                     case 5:
@@ -657,7 +688,6 @@ void shop()
                             Console.WriteLine("There is nothing to buy here");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                             break;
                         }
                         if(goldCount >= shopList[3].goldValue)
@@ -680,7 +710,6 @@ void shop()
                             Console.WriteLine("That Item costs too much");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                         }
                         break;
                     case 6:
@@ -695,7 +724,6 @@ void shop()
                             Console.WriteLine("There is nothing to buy here");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                             break;
                         }
                         if(goldCount >= shopList[4].goldValue)
@@ -718,7 +746,6 @@ void shop()
                             Console.WriteLine("That Item costs too much");
                             Console.ReadLine();
                             checkingChoice = false;
-                            choicesMade ++;
                         }
                         break;
 
@@ -871,6 +898,15 @@ void randRoomGenerator()
 void RoomZero()
 {
 
+}
+class Monsters
+{
+    public string name;
+    public int level;
+    public int MonsterIntiative;
+    public int MonsterHitPoints;
+    public int MonsterAC;
+    public int MonsterAttackDamage;
 }
 class Items
 {
