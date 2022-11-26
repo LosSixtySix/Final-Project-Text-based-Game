@@ -26,6 +26,7 @@ int numberOfRooms = 0;
 int maxRooms = 10;
 int maxDungeonLevels = 4;
 bool bossRoom = false;
+string[] roomsAlreadyRolled = new string[maxRooms];
 
 
 
@@ -337,21 +338,34 @@ void combat()
                         Console.Clear();
                         PrintInventory(backPack);
                         bool useInventory = true;
+                        Console.WriteLine("Type 'leave' to leave the backpack.");
+
                         int inventoryChoice = 0;
                         int ammountOfFailedChoicesMade = 0;
                         bool usingItem = false;
                         Items ChosenItem = emptySlot;
                         while(useInventory)
                         {
+                            string? leaveInventory = Console.ReadLine();
 
-                            bool successInventroySelect = int.TryParse(Console.ReadLine(), out inventoryChoice);
-                            
+                            bool successInventroySelect = int.TryParse(leaveInventory, out inventoryChoice);
+                            inventoryChoice--;   
                             if(successInventroySelect == true && inventoryChoice < backPack.Length && inventoryChoice > 0)
                             {
-                                inventoryChoice--;
+
                                 useInventory = false;
                                 usingItem = true;
                                 ChosenItem = backPack[inventoryChoice];
+                            }
+                            else if(successInventroySelect == false && leaveInventory.ToLower() == "leave")
+                            {
+                                useInventory = false;
+                                CheckingInventory = true;
+                                makeAChoice = true;
+                                Console.WriteLine("You are leaving the backpack");
+                                playerTurn = true;
+                                monsterTurn = false;
+                                break;
                             }
                             else
                             {
@@ -366,6 +380,9 @@ void combat()
                                 Console.WriteLine("You have taken too long, this is your last chance before your turn ends");
                                 useInventory = false;
                                 usingItem = false;
+                                CheckingInventory = true;
+                                makeAChoice = false;
+                                monsterTurn = true;
                             }
                             if(ChosenItem.name.Contains("Health"))
                             {
@@ -374,6 +391,9 @@ void combat()
                                 useInventory = false;
                                 usingItem = false;
                                 Console.WriteLine($"You heal {ChosenItem.healBonus} points");
+                                CheckingInventory = true;
+                                makeAChoice = false;
+                                monsterTurn = true;
                             }
                             if(ChosenItem.name.Contains("Throwing"))
                             {
@@ -382,6 +402,9 @@ void combat()
                                 useInventory = false;
                                 usingItem = false;
                                 Console.WriteLine($"You use a {ChosenItem.name} on {ChosenMonster.name}");
+                                CheckingInventory = true;
+                                makeAChoice = false;
+                                monsterTurn = true;
                             }
                             if(ChosenItem.name.Contains("Bomb"))
                             {
@@ -390,18 +413,19 @@ void combat()
                                 useInventory = false;
                                 usingItem = false;
                                 Console.WriteLine($"You use a {ChosenItem.name} on {ChosenMonster.name}");
+                                CheckingInventory = true;
+                                makeAChoice = false;
+                                monsterTurn = true;
                             }
                             else if(ChosenItem == emptySlot)
                             {
                                 Console.WriteLine("That is an empty slot please make a different selection");
+                                usingItem = false;
+                                useInventory = true;
                                 ammountOfFailedChoicesMade ++;
                             }
                         }
-                            Console.ReadLine();
-                        
-                        CheckingInventory = true;
-                        makeAChoice = false;
-                        monsterTurn = true;
+                        Console.ReadLine();
                         break;
                     case 3: 
                         temp_playerAC += shield.raiseShieldBonus *2;
@@ -863,7 +887,7 @@ void TresureRoom()
 void ItemDropRoom()
 {
     Console.Clear();
-    Console.WriteLine("This room will drop an item");
+    Console.WriteLine("You come across a storage looking room and decide to rumage through it for anything useful....");
     int randoDrop = rand.Next(0, itemRoomPullList.Count);
     Items droppedItem = itemRoomPullList[randoDrop];
     Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
@@ -902,10 +926,11 @@ void ItemDropRoom()
                     Console.WriteLine("Which slot would you like to put it in?");
                     int slotChoice;
                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                    slotChoice --;
                     if(successChoice && slotChoice< backPack.Length)
                     {
                         backPack[slotChoice]= droppedItem;
-                        Console.WriteLine($"You have succesfully picked up {droppedItem}. Press enter to continue");
+                        Console.WriteLine($"You have succesfully picked up {droppedItem.name}. Press enter to continue");
                         choosingSlot = false;
                         makingDecision = false;
                     }
@@ -1011,44 +1036,70 @@ void randRoomGenerator()
     {
         numberOfRooms = 0;
         dungeonLevel ++;
+        for(int i = 0; i< roomsAlreadyRolled.Count(); i++)
+        {
+            roomsAlreadyRolled[i] = "Null";
+        }
         bossRoom = true;
     }
-    int randRoom = rand.Next(1,15);
-    if(bossRoom == true)
+    bool determineRoom = true;
+    while(determineRoom)
     {
-        boss_Room();
-        bossRoom = false;
-    }
-    else if(bossRoom != true)
-    {
-        numberOfRooms++;
-        if(randRoom == 1)
-            {
-                shop();
-            }
-        else if(randRoom == 2)
-            {
-                TresureRoom();
-            }
-        else if(randRoom == 3 || randRoom == 7 || randRoom == 8 || randRoom == 14)
-            {
-                ItemDropRoom();
-            }
-        else if(randRoom == 4 || randRoom == 11 || randRoom == 12 || randRoom == 13)
-            {
-                combat();
-            }
-        else if(randRoom == 5 || randRoom == 9 || randRoom == 10)
-            {
-                TrapRoom();
-            }
-        else if(randRoom == 6)
-            {
-                MiniBoss();
-                Console.WriteLine(dungeonLevel);
-                Console.WriteLine(numberOfRooms);
-            }
+        int randRoom = rand.Next(1,15);
+        if(bossRoom == true)
+        {
+            boss_Room();
+            bossRoom = false;
+        }
+        else if(bossRoom != true)
+        {
+            numberOfRooms++;
+            if(randRoom == 1)
+                {
+                    if(roomsAlreadyRolled[0] != "Shop" && roomsAlreadyRolled[1] != "Shop")
+                    {
+                        shop();
+                        if(roomsAlreadyRolled[0] != "Shop")
+                        {
+                            roomsAlreadyRolled[0] = "Shop";
+                            determineRoom = false;
+                        }
+                        else if(roomsAlreadyRolled[0] == "Shop")
+                        {
+                            roomsAlreadyRolled[1] = "Shop";
+                            determineRoom = false;
+                        }
+                    }
+                }
+            else if(randRoom == 2)
+                {
+                    TresureRoom();
+                    determineRoom = false;
+                }
+            else if(randRoom == 3 || randRoom == 7 || randRoom == 8 || randRoom == 14)
+                {
+                    ItemDropRoom();
+                    determineRoom = false;
+                }
+            else if(randRoom == 4 || randRoom == 11 || randRoom == 12 || randRoom == 13)
+                {
+                    combat();
+                    determineRoom = false;
+                }
+            else if(randRoom == 5 || randRoom == 9 || randRoom == 10)
+                {
+                    TrapRoom();
+                    determineRoom = false;
+                }
+            else if(randRoom == 6)
+                {
+                    MiniBoss();
+                    determineRoom = false;
+                    Console.WriteLine(dungeonLevel);
+                    Console.WriteLine(numberOfRooms);
+                }
 
+        }
     }
     
 }
