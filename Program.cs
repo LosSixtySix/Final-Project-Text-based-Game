@@ -600,9 +600,33 @@ void changeEquipment()
     {
         Console.WriteLine($"{i}: {backPack[i].name}");
     }
+    bool choosingSlot = true;
+    while(choosingSlot)
+    {
+        bool successEquipmentChoice = int.TryParse(Console.ReadLine(), out equipmentChoice);
 
-    bool successEquipmentChoice = int.TryParse(Console.ReadLine(), out equipmentChoice);
-    equippedWeapon = backPack[equipmentChoice];
+        if(successEquipmentChoice)
+        {
+            string? equipment = backPack[equipmentChoice].name;
+            if(equipment.Contains("Sword"))
+            {
+                equippedWeapon = backPack[equipmentChoice];
+            }
+            else if(equipment.Contains("Shield"))
+            {
+                equippedShield = backPack[equipmentChoice];
+            }
+            else if(equipment.Contains("Boots"))
+            {
+                equippedBoots = backPack[equipmentChoice];
+            }
+            else if(equipment.Contains("Gloves"))
+            {
+                equippedGloves = backPack[equipmentChoice];
+            }
+
+        }
+    }
 }
 
 //Rooms
@@ -1153,6 +1177,25 @@ void TrapRoom()
 {
     Console.Clear();
     Console.WriteLine("It's a TRAP!!");
+}
+void RestArea()
+{
+    Console.Clear();
+    Console.WriteLine("You find an area that seems safe enough to rest, what would you like to do before you sleep?");
+    Console.WriteLine("1: Rest 2: Change Equipment 3: Use a Health Item");
+    bool resting = true;
+    while(resting)
+    {
+        int choiceInt;
+        bool successChoice = int.TryParse(Console.ReadLine(), out choiceInt);
+        if(successChoice)
+        {
+            switch(choiceInt)
+            {
+                
+            }
+        }
+    }
 }
 void MiniBoss()
 {
