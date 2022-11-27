@@ -174,7 +174,7 @@ Items equippedGloves = emptySlot;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
-int goldCount = 0;
+int goldCount = 2500;
 int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
@@ -350,7 +350,7 @@ void combat()
 
                             bool successInventroySelect = int.TryParse(leaveInventory, out inventoryChoice);
                             inventoryChoice--;   
-                            if(successInventroySelect == true && inventoryChoice < backPack.Length && inventoryChoice > 0)
+                            if(successInventroySelect == true && inventoryChoice < backPack.Length && inventoryChoice >= 0)
                             {
 
                                 useInventory = false;
@@ -603,6 +603,8 @@ void changeEquipment()
 ///SHOP///
 void shop()
 {
+    Items boughtItem = emptySlot;
+    bool choosingSlot = false;
     int choicesMade = 0;
     for(int i = 0; i < shopList.Length; i ++)
     {
@@ -653,6 +655,7 @@ void shop()
                         shopping = false;
                         break;
                     case 2:
+                        boughtItem = shopList[0];
                         if(AllEmpty(shopList))
                         {
                             Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
@@ -680,6 +683,35 @@ void shop()
                                 checkingChoice = false;
                                 choicesMade ++;
                             }
+                            else if(checkingEmptySlotReturn == 100)
+                            {
+                                choosingSlot = true;
+
+                                while(choosingSlot)
+                                {
+
+                                    PrintInventory(backPack);
+                                    Console.WriteLine("You have no empty slots left in your backpack.");
+                                    Console.WriteLine("Which slot would you like to put it in?");
+                                    int slotChoice;
+                                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                                    slotChoice --;
+                                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
+                                    {
+                                        backPack[slotChoice]= boughtItem;
+                                        Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        shopList[0] = emptySlot;
+                                        choosingSlot = false;
+                                        checkingChoice = false;
+                                    }
+                                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
+                                    {
+                                        Console.WriteLine("That is not a valid choice, try again");
+                                        Console.ReadLine();
+                                    }
+                                }
+
+                            }
                         }
                         else if(goldCount < shopList[0].goldValue)
                         {
@@ -689,6 +721,7 @@ void shop()
                         }
                         break;
                     case 3:
+                        boughtItem = shopList[1];
                         if(AllEmpty(shopList))
                         {
                             Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
@@ -716,6 +749,35 @@ void shop()
                                 choicesMade ++;
                                 checkingChoice = false;
                             }
+                            else if(checkingEmptySlotReturn == 100)
+                            {
+                                choosingSlot = true;
+
+                                while(choosingSlot)
+                                {
+
+                                    PrintInventory(backPack);
+                                    Console.WriteLine("You have no empty slots left in your backpack.");
+                                    Console.WriteLine("Which slot would you like to put it in?");
+                                    int slotChoice;
+                                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                                    slotChoice --;
+                                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
+                                    {
+                                        backPack[slotChoice]= boughtItem;
+                                        Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        shopList[1] = emptySlot;
+                                        choosingSlot = false;
+                                        checkingChoice = false;
+                                    }
+                                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
+                                    {
+                                        Console.WriteLine("That is not a valid choice, try again");
+                                        Console.ReadLine();
+                                    }
+                                }
+
+                            }
                         }
                         else if(goldCount < shopList[1].goldValue)
                         {
@@ -725,6 +787,7 @@ void shop()
                         }
                         break;
                     case 4:
+                        boughtItem = shopList[2];
                         if(AllEmpty(shopList))
                         {
                             Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
@@ -752,6 +815,35 @@ void shop()
                                 checkingChoice = false;
                                 choicesMade ++;
                             }
+                            else if(checkingEmptySlotReturn == 100)
+                            {
+                                choosingSlot = true;
+
+                                while(choosingSlot)
+                                {
+
+                                    PrintInventory(backPack);
+                                    Console.WriteLine("You have no empty slots left in your backpack.");
+                                    Console.WriteLine("Which slot would you like to put it in?");
+                                    int slotChoice;
+                                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                                    slotChoice --;
+                                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
+                                    {
+                                        backPack[slotChoice]= boughtItem;
+                                        Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        shopList[2] = emptySlot;
+                                        choosingSlot = false;
+                                        checkingChoice = false;
+                                    }
+                                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
+                                    {
+                                        Console.WriteLine("That is not a valid choice, try again");
+                                        Console.ReadLine();
+                                    }
+                                }
+
+                            }
                         }
                         else if(goldCount < shopList[2].goldValue)
                         {
@@ -761,6 +853,7 @@ void shop()
                         }
                         break;
                     case 5:
+                        boughtItem = shopList[3];
                         if(AllEmpty(shopList))
                         {
                             Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
@@ -788,6 +881,35 @@ void shop()
                                 checkingChoice = false;
                                 choicesMade ++;
                             }
+                            else if(checkingEmptySlotReturn == 100)
+                            {
+                                choosingSlot = true;
+
+                                while(choosingSlot)
+                                {
+
+                                    PrintInventory(backPack);
+                                    Console.WriteLine("You have no empty slots left in your backpack.");
+                                    Console.WriteLine("Which slot would you like to put it in?");
+                                    int slotChoice;
+                                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                                    slotChoice --;
+                                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
+                                    {
+                                        backPack[slotChoice]= boughtItem;
+                                        Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        shopList[3] = emptySlot;
+                                        choosingSlot = false;
+                                        checkingChoice = false;
+                                    }
+                                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
+                                    {
+                                        Console.WriteLine("That is not a valid choice, try again");
+                                        Console.ReadLine();
+                                    }
+                                }
+
+                            }
                         }
                         else if(goldCount < shopList[3].goldValue)
                         {
@@ -797,6 +919,7 @@ void shop()
                         }
                         break;
                     case 6:
+                        boughtItem = shopList[4];
                         if(AllEmpty(shopList))
                         {
                             Console.WriteLine("There is nothing left to buy from the merchant, You must Leave now");
@@ -823,6 +946,35 @@ void shop()
                                 Console.ReadLine();
                                 checkingChoice = false;
                                 choicesMade ++;
+                            }
+                            else if(checkingEmptySlotReturn == 100)
+                            {
+                                choosingSlot = true;
+
+                                while(choosingSlot)
+                                {
+
+                                    PrintInventory(backPack);
+                                    Console.WriteLine("You have no empty slots left in your backpack.");
+                                    Console.WriteLine("Which slot would you like to put it in?");
+                                    int slotChoice;
+                                    bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
+                                    slotChoice --;
+                                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
+                                    {
+                                        backPack[slotChoice]= boughtItem;
+                                        Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        shopList[4] = emptySlot;
+                                        choosingSlot = false;
+                                        checkingChoice = false;
+                                    }
+                                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
+                                    {
+                                        Console.WriteLine("That is not a valid choice, try again");
+                                        Console.ReadLine();
+                                    }
+                                }
+
                             }
                         }
                         else if(goldCount < shopList[4].goldValue)
@@ -927,14 +1079,14 @@ void ItemDropRoom()
                     int slotChoice;
                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                     slotChoice --;
-                    if(successChoice && slotChoice< backPack.Length)
+                    if(successChoice && slotChoice< backPack.Length && slotChoice >= 0)
                     {
                         backPack[slotChoice]= droppedItem;
                         Console.WriteLine($"You have succesfully picked up {droppedItem.name}. Press enter to continue");
                         choosingSlot = false;
                         makingDecision = false;
                     }
-                    else if(successChoice == false || slotChoice >= backPack.Length)
+                    else if(successChoice == false || slotChoice >= backPack.Length || slotChoice < 0)
                     {
                         Console.WriteLine("That is not a valid choice, try again");
                         Console.ReadLine();
@@ -1164,7 +1316,7 @@ while(playGame)
         randRoomGenerator();
         Console.WriteLine("Press Enter to continue");
         Console.ReadLine();
-        if(hardCoreMode == false)
+        if(hardCoreMode == false && playerHp >0)
         {
             if(playerHp +2< playerMaxHP)
             {
@@ -1172,7 +1324,7 @@ while(playGame)
                 Console.ReadLine();
                 playerHp += 2;
             }
-            else if(playerHp +1 < playerMaxHP)
+            else if(playerHp +1 < playerMaxHP && playerHp> 0)
             {
                 Console.WriteLine("You try to sleep in this gloomy place, but struggle to get comfortable. You still manage to heal 1 HP");
                 Console.ReadLine();
