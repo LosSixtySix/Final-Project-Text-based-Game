@@ -21,10 +21,9 @@ int rollDie(int dice)
 
 //Dungeon Creator Variables//
 int dungeonLevel = 1;
-int roomNumber = 0;
 int numberOfRooms = 0;
-int maxRooms = 10;
-int maxDungeonLevels = 4;
+int maxRooms = 20;
+int maxDungeonLevels = 5;
 bool bossRoom = false;
 string[] roomsAlreadyRolled = new string[maxRooms];
 
@@ -125,7 +124,7 @@ bigBackPack.goldValue = 15;
 bigBackPack.inventorySlotsBonus =3;
 
 List<Items> itemRoomPullList = new List<Items>(){throwingDagger, throwingDagger, throwingDagger, healthPotion, healthPotion, healthPotion, healthPotion, healthPotion, healthPotion, throwingAxe, expertHealthPotion, greaterHealthPotion, greaterHealthPotion, greaterHealthPotion, bomb };
-List<Items> treasureRoomPullList = new List<Items>(){magicShield, magicSword, bootsofSpeed};
+List<Items> treasureRoomPullList = new List<Items>(){magicShield, magicSword, bootsofSpeed, bigBackPack};
 
 List<Items> merchantPullList = new List<Items>(){healthPotion, greaterHealthPotion, expertHealthPotion, throwingDagger, bomb};
 Items[] shopList = new Items[5];
@@ -147,6 +146,7 @@ skeleton.MonsterAC = 15;
 skeleton.MonsterAttackDamage = 1;
 skeleton.MonsterIntiative = 3;
 skeleton.MonsterHitPoints = 5;
+skeleton.experienceWorth = 5;
 
 Monsters rat = new Monsters();
 rat.name = "Dire Rat";
@@ -155,6 +155,7 @@ rat.MonsterAC = 10;
 rat.MonsterAttackDamage = 5;
 rat.MonsterIntiative = 6;
 rat.MonsterHitPoints = 3;
+skeleton.experienceWorth = 8;
 
 Monsters minotaur = new Monsters();
 minotaur.name = "Minotaur";
@@ -163,6 +164,7 @@ minotaur.MonsterAC = 12;
 minotaur.MonsterAttackDamage = 2;
 minotaur.MonsterIntiative = 4;
 minotaur.MonsterHitPoints = 10;
+minotaur.experienceWorth = 5;
 
 List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur, skeleton, skeleton, skeleton, rat, rat, rat, rat, rat, rat};
 List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
@@ -174,7 +176,7 @@ Items equippedGloves = emptySlot;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
-int goldCount = 2500;
+int goldCount = 0;
 int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
@@ -188,8 +190,7 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
 }
-backPack.SetValue(throwingAxe, 0);
-backPack.SetValue(expertHealthPotion, 1);
+backPack.SetValue(healthPotion, 0);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -485,6 +486,13 @@ void combat()
                 int goldGain = rollDie(dEight) + (ChosenMonster.level *4);
                 goldCount += goldGain;
                 Console.WriteLine($"You gained {goldGain} gold pieces");
+                experience = ExperienceGain(ChosenMonster, experience);
+                if(LevelUp(experience,Playerlevel))
+                {
+                    Console.WriteLine("You have gained enough experience that you have leveled up!!");
+                    Playerlevel++;
+                    experience = 0;
+                }
 
             }
             else if(hit)
@@ -1027,8 +1035,24 @@ void TresureRoom()
             Console.WriteLine("You have found a pair of Boots of Speed");
             treasureRoomPullList.Remove(droppedItem);
         }
+        if(droppedItem == bigBackPack)
+        {
+            equippedBackPack = bigBackPack;
+            Console.WriteLine("You have found a larger Back Pack");
+            treasureRoomPullList.Remove(droppedItem);
+            Items[] BiggerBackPack = new Items[inventoryCount + equippedBackPack.inventorySlotsBonus];
+            for(int i = 0; i < backPack.Length; i++)
+            {
+                BiggerBackPack[i] = backPack[i];
+            }
+            backPack = BiggerBackPack;
+            for(int x = 5; x < backPack.Length; x ++)
+            {
+                backPack[x] = emptySlot;
+            }
+        }
     }
-    else if(equippedShield == magicShield && equippedWeapon == magicSword && equippedBoots == bootsofSpeed)
+    else if(treasureRoomPullList.Count == 0)
     {
         int gainedGold = 10 + (dungeonLevel * 5) + rollDie(dEight);
         Console.WriteLine("You don't manage to find anything better than what you are already using, but you do manage to pick up some gold.");
@@ -1139,6 +1163,19 @@ void boss_Room()
 {
     Console.Clear();
     Console.WriteLine("This is the boss room");
+}
+//Level Up Method//
+static int ExperienceGain(Monsters x, int experience)
+{
+    return x.experienceWorth + experience;
+}
+static bool LevelUp(int experience, int level)
+{
+    if(experience >= 20 * level )
+    {
+        return true;
+    }
+    return false;
 }
 
 //Inventory Management 
@@ -1261,79 +1298,87 @@ void RoomZero()
 }
 void main()
 {
-while(playGame)
-{
-    printCastle();
-    Console.WriteLine("The Castle of Terath");
-    Console.WriteLine("Would you like to play hard core mode? type y for yes or n for no.");
-    string? terminalInput = Console.ReadLine();
-    int hardCoreDecisionInt;
-    bool hardCoreDecisionSuccess = int.TryParse(terminalInput, out hardCoreDecisionInt);
-    if(hardCoreDecisionSuccess == false)
+    while(playGame)
     {
-        string? hardCoreDecision = terminalInput;
-        if(hardCoreDecision.ToLower() == "y")
+        printCastle();
+        Console.WriteLine("The Castle of Terath");
+        Console.WriteLine("Would you like to play hard core mode? type y for yes or n for no.");
+        string? terminalInput = Console.ReadLine();
+        int hardCoreDecisionInt;
+        bool hardCoreDecisionSuccess = int.TryParse(terminalInput, out hardCoreDecisionInt);
+        if(hardCoreDecisionSuccess == false)
         {
-            hardCoreMode = true;
-        }
-        else if(hardCoreDecision.ToLower() == "n")
-        {
-            hardCoreMode = false;
-        }
-        else
-        {
-            Console.WriteLine("That is not a valid decision, hard core mode will be randomized......");
-            int randoHardMode = rand.Next(1, 3);
-            if(randoHardMode == 1)
+            string? hardCoreDecision = terminalInput;
+            if(hardCoreDecision.ToLower() == "y")
             {
                 hardCoreMode = true;
             }
-            else if(randoHardMode == 2)
+            else if(hardCoreDecision.ToLower() == "n")
             {
                 hardCoreMode = false;
+            }
+            else
+            {
+                Console.WriteLine("That is not a valid decision, hard core mode will be randomized......");
+                int randoHardMode = rand.Next(1, 3);
+                if(randoHardMode == 1)
+                {
+                    hardCoreMode = true;
+                }
+                else if(randoHardMode == 2)
+                {
+                    hardCoreMode = false;
+                }
             }
         }
-    }
-    if(hardCoreDecisionSuccess)
-    {
-        Console.WriteLine("That is not a valid decision, hard core mode will be randomized.......");
-            int randoHardMode = rand.Next(1, 3);
-            if(randoHardMode == 1)
-            {
-                hardCoreMode = true;
-            }
-            else if(randoHardMode == 2)
-            {
-                hardCoreMode = false;
-            }
-    }
-    Console.WriteLine("Press Enter to Start");
-    Console.ReadLine();
-    RoomZero();
-    Console.ReadLine();
-    while(numberOfRooms <= maxRooms && playGame)
-    {
-        randRoomGenerator();
-        Console.WriteLine("Press Enter to continue");
+        if(hardCoreDecisionSuccess)
+        {
+            Console.WriteLine("That is not a valid decision, hard core mode will be randomized.......");
+                int randoHardMode = rand.Next(1, 3);
+                if(randoHardMode == 1)
+                {
+                    hardCoreMode = true;
+                }
+                else if(randoHardMode == 2)
+                {
+                    hardCoreMode = false;
+                }
+        }
+        Console.WriteLine("Press Enter to Start");
         Console.ReadLine();
-        if(hardCoreMode == false && playerHp >0)
+        RoomZero();
+        Console.ReadLine();
+        while(numberOfRooms <= maxRooms && playGame)
         {
-            if(playerHp +2< playerMaxHP)
+            if(dungeonLevel < maxDungeonLevels)
             {
-                Console.WriteLine("You rest a little and heal 2 HP");
+                randRoomGenerator();
+                Console.WriteLine("Press Enter to continue");
                 Console.ReadLine();
-                playerHp += 2;
+                if(hardCoreMode == false && playerHp >0)
+                {
+                    if(playerHp +2< playerMaxHP)
+                    {
+                        Console.WriteLine("You rest a little and heal 2 HP");
+                        Console.ReadLine();
+                        playerHp += 2;
+                    }
+                    else if(playerHp +1 < playerMaxHP && playerHp> 0)
+                    {
+                        Console.WriteLine("You try to sleep in this gloomy place, but struggle to get comfortable. You still manage to heal 1 HP");
+                        Console.ReadLine();
+                        playerHp += 1;
+                    }
+                }
             }
-            else if(playerHp +1 < playerMaxHP && playerHp> 0)
+            else if(dungeonLevel >= maxDungeonLevels)
             {
-                Console.WriteLine("You try to sleep in this gloomy place, but struggle to get comfortable. You still manage to heal 1 HP");
-                Console.ReadLine();
-                playerHp += 1;
+                playGame = false;
             }
         }
     }
-}
-
+    Console.WriteLine("You have beaten the final boss, Congratualtions! You have won! Press Enter to leave the game.");
+    Console.ReadLine();
 }
 class Monsters
 {
@@ -1343,6 +1388,7 @@ class Monsters
     public int MonsterHitPoints;
     public int MonsterAC;
     public int MonsterAttackDamage;
+    public int experienceWorth;
 }
 class Items
 {
