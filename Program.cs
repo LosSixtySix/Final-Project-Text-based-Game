@@ -798,6 +798,7 @@ void shop()
                                     {
                                         backPack[slotChoice]= boughtItem;
                                         Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        goldCount -= shopList[1].goldValue;
                                         shopList[1] = emptySlot;
                                         choosingSlot = false;
                                         checkingChoice = false;
@@ -864,6 +865,7 @@ void shop()
                                     {
                                         backPack[slotChoice]= boughtItem;
                                         Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        goldCount -= shopList[2].goldValue;
                                         shopList[2] = emptySlot;
                                         choosingSlot = false;
                                         checkingChoice = false;
@@ -930,6 +932,7 @@ void shop()
                                     {
                                         backPack[slotChoice]= boughtItem;
                                         Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        goldCount -= shopList[3].goldValue;
                                         shopList[3] = emptySlot;
                                         choosingSlot = false;
                                         checkingChoice = false;
@@ -996,6 +999,7 @@ void shop()
                                     {
                                         backPack[slotChoice]= boughtItem;
                                         Console.WriteLine($"You have succesfully bought {boughtItem.name}. Press enter to continue");
+                                        goldCount -= shopList[4].goldValue;
                                         shopList[4] = emptySlot;
                                         choosingSlot = false;
                                         checkingChoice = false;
@@ -1091,6 +1095,7 @@ void ItemDropRoom()
     int randoDrop = rand.Next(0, itemRoomPullList.Count);
     Items droppedItem = itemRoomPullList[randoDrop];
     Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
+    PrintInventory(backPack);
     int decisionsMade = 0;
     bool makingDecision = true;
     while(makingDecision)
@@ -1121,8 +1126,6 @@ void ItemDropRoom()
                 int slotChoicesMade = 0;
                 while(choosingSlot)
                 {
-
-                    PrintInventory(backPack);
                     Console.WriteLine("Which slot would you like to put it in?");
                     int slotChoice;
                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
@@ -1192,7 +1195,36 @@ void RestArea()
         {
             switch(choiceInt)
             {
-                
+                case 1:
+                    Console.WriteLine("You rest and dream of brighter places....");
+                    if(playerHp != playerMaxHP)
+                    {
+                        if(playerHp <= playerMaxHP-5)
+                        {
+                            playerHp+= 5;
+                        }
+                        if(playerHp +4 == playerMaxHP)
+                        {
+                            playerHp += 4;
+                        }
+                        if(playerHp +3 == playerMaxHP)
+                        {
+                            playerHp += 3;
+                        }
+                        if(playerHp +2 == playerMaxHP)
+                        {
+                            playerHp += 2;
+                        }
+                        if(playerHp +1 == playerMaxHP)
+                        {
+                            playerHp += 1;
+                        }
+                    }
+                    break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
             }
         }
     }
@@ -1227,7 +1259,7 @@ void PrintInventory(Items[] x)
 
     for(int i = 0; i < x.Length; i++)
     {
-        Console.WriteLine($"{x[i].name}");
+        Console.WriteLine($"{i+1}: {x[i].name}");
     }
 }
 void PrintShopInventory(Items[] x)
