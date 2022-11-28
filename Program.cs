@@ -622,6 +622,18 @@ static int monsterType(string name)
     {
         return 3;
     }
+    else if(name == "Merglex")
+    {
+        return 4;
+    }
+    else if(name == "Si'rnes")
+    {
+        return 5;
+    }
+    else if(name == "Thorn")
+    {
+        return 6;
+    }
     return 1;
 }
 static int monsterPictureType(int monsterType)
