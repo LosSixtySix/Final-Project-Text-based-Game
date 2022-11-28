@@ -15,6 +15,7 @@ int dThree = 4;
 bool playGame = true;
 bool bossRoomBool = false;
 bool miniBossRoomBool = false;
+bool weaponProficenyBool = false;
 
 int rollDie(int dice)
 {
@@ -212,11 +213,32 @@ List<Monsters> listOfMiniBossesLevelTwo = new List<Monsters>(){Thorn};
 List<Monsters> listOfMiniBossesLevelThree = new List<Monsters>(){Sirnes};
 
 //Player
+    //level up traits
+Traits weaponProficeny = new Traits();
+weaponProficeny.name = "Weapon Mastery";
+weaponProficeny.damageBonus = 2;
+
+Traits TrollBlood = new Traits();
+TrollBlood.name = "Troll Blood";
+TrollBlood.healthBonus = 2;
+
+Traits emptyTrait = new Traits();
+emptyTrait.name = "[Empty Slot]";
+
+Traits[] PlayerOwnedTraits = new Traits[10];
+for(int ownedTratis = 0; ownedTratis<PlayerOwnedTraits.Length; ownedTratis++)
+{
+    PlayerOwnedTraits[ownedTratis] = emptyTrait;
+}
+
+List<Traits> listOfAttainableTraits = new List<Traits>(){weaponProficeny, TrollBlood};
+    //Items
 Items equippedBackPack = emptySlot;
 Items equippedGloves = wornGloves;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
+    //Player Variables
 int goldCount = 10;
 int hitPoints = 10;
 int Playerlevel = 1;
@@ -577,11 +599,44 @@ void combat()
                 goldCount += goldGain;
                 Console.WriteLine($"You gained {goldGain} gold pieces");
                 experience = ExperienceGain(ChosenMonster, experience);
+                Console.ReadLine();
                 if(LevelUp(experience,Playerlevel))
                 {
-                    Console.WriteLine("You have gained enough experience that you have leveled up!!");
-                    Playerlevel++;
-                    experience = 0;
+                    bool levelingUp = true;
+                    while(levelingUp)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("You have gained enough experience that you have leveled up!!");
+                        Console.WriteLine("What trait would you like to gain?");
+                        for(int traitPosition = 0; traitPosition < listOfAttainableTraits.Count(); traitPosition++)
+                        {
+                            Console.WriteLine($"{traitPosition+1}: {listOfAttainableTraits[traitPosition].name}");
+                        }
+                        bool choosingTrait = true;
+                        while(choosingTrait)
+                        {
+                            int TraitChoiceInt;
+                            bool succesTraitChoice = int.TryParse(Console.ReadLine(), out TraitChoiceInt);
+                            TraitChoiceInt --;
+                            if(succesTraitChoice && TraitChoiceInt < listOfAttainableTraits.Count() && TraitChoiceInt >=0)
+                            {
+                                PlayerOwnedTraits[nextEmptyTrait(PlayerOwnedTraits)] = listOfAttainableTraits[TraitChoiceInt];
+                                choosingTrait = false;
+                                levelingUp = false;
+                                if(listOfAttainableTraits[TraitChoiceInt] == weaponProficeny)
+                                {
+                                    weaponProficenyBool = true;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("That is not a valid selection, try again.");
+                                choosingTrait = false;
+                            }
+                        }
+                        Playerlevel++;
+                        experience = 0;
+                    }
                 }
 
             }
@@ -1469,6 +1524,18 @@ int nextEmptySlot(Items[] x)
     }
     return 100;
 }
+int nextEmptyTrait(Traits[] x)
+{
+    for(int i = 0; i<x.Length; i ++)
+    {
+        if(x[i] == emptyTrait)
+        {
+            return i;
+        }
+    }
+    return 100;
+}
+
 bool AllEmpty(Items[] x)
 {
     if(x[0] == emptySlot && x[1] == emptySlot && x[2] == emptySlot && x[3] == emptySlot && x[4] == emptySlot)
@@ -1650,6 +1717,12 @@ void main()
                 randRoomGenerator();
                 Console.WriteLine("Press Enter to continue");
                 Console.ReadLine();
+                if(PlayerOwnedTraits.Contains(weaponProficeny) && weaponProficenyBool)
+                {
+                    equippedWeapon.level *= 2;
+                    weaponProficenyBool = false;
+                    
+                }
                 if(hardCoreMode == false && playerHp >0)
                 {
                     if(playerHp +2< playerMaxHP)
@@ -1701,4 +1774,12 @@ class Items
     public int goldValue;
     public int intiativeBonus;
     
+}
+class Traits
+{
+    public string? name;
+    public int damageBonus;
+    public int healthBonus;
+    public int AcBonus;
+
 }
