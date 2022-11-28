@@ -22,7 +22,7 @@ int rollDie(int dice)
 //Dungeon Creator Variables//
 int dungeonLevel = 1;
 int numberOfRooms = 0;
-int maxRooms = 20;
+int maxRooms = 10;
 int maxDungeonLevels = 5;
 bool bossRoom = false;
 string[] roomsAlreadyRolled = new string[maxRooms];
@@ -190,7 +190,7 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
 }
-backPack.SetValue(healthPotion, 0);
+backPack.SetValue(magicShield, 0);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -594,7 +594,7 @@ bool fledBattle(int randDieRoll)
 // Change Equipment
 void changeEquipment()
 {
-
+    Console.Clear();
     int equipmentChoice;
     for(int i = 0; i < backPack.Length; i ++)
     {
@@ -607,22 +607,39 @@ void changeEquipment()
 
         if(successEquipmentChoice)
         {
+            Items chosenEquipment = backPack[equipmentChoice];
             string? equipment = backPack[equipmentChoice].name;
             if(equipment.Contains("Sword"))
             {
-                equippedWeapon = backPack[equipmentChoice];
+                backPack[equipmentChoice] = equippedWeapon;
+                equippedWeapon = chosenEquipment;
+                choosingSlot = false;
+                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
             }
             else if(equipment.Contains("Shield"))
             {
-                equippedShield = backPack[equipmentChoice];
+                backPack[equipmentChoice] = equippedShield;
+                equippedShield = chosenEquipment;
+                choosingSlot = false;
+                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
             }
             else if(equipment.Contains("Boots"))
             {
-                equippedBoots = backPack[equipmentChoice];
+                backPack[equipmentChoice] = equippedBoots;
+                equippedBoots = chosenEquipment;
+                choosingSlot = false;
+                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
             }
             else if(equipment.Contains("Gloves"))
             {
-                equippedGloves = backPack[equipmentChoice];
+                backPack[equipmentChoice] = equippedGloves;
+                equippedGloves = chosenEquipment;
+                choosingSlot = false;
+                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
+            }
+            else
+            {
+                Console.WriteLine("That is not a valid option, please try again.");
             }
 
         }
@@ -1183,48 +1200,58 @@ void TrapRoom()
 }
 void RestArea()
 {
-    Console.Clear();
-    Console.WriteLine("You find an area that seems safe enough to rest, what would you like to do before you sleep?");
-    Console.WriteLine("1: Rest 2: Change Equipment 3: Use a Health Item");
-    bool resting = true;
-    while(resting)
+    bool restArea = true;
+    while(restArea)
     {
-        int choiceInt;
-        bool successChoice = int.TryParse(Console.ReadLine(), out choiceInt);
-        if(successChoice)
+        Console.Clear();
+        Console.WriteLine("You find an area that seems safe enough to rest, what would you like to do before you sleep?");
+        Console.WriteLine("1: Rest 2: Change Equipment 3: Use a Health Item");
+        bool resting = true;
+        while(resting)
         {
-            switch(choiceInt)
+            int choiceInt;
+            bool successChoice = int.TryParse(Console.ReadLine(), out choiceInt);
+            if(successChoice)
             {
-                case 1:
-                    Console.WriteLine("You rest and dream of brighter places....");
-                    if(playerHp != playerMaxHP)
-                    {
-                        if(playerHp <= playerMaxHP-5)
+                switch(choiceInt)
+                {
+                    case 1:
+                        Console.WriteLine("You rest and dream of brighter places....");
+                        if(playerHp != playerMaxHP)
                         {
-                            playerHp+= 5;
+                            if(playerHp <= playerMaxHP-5)
+                            {
+                                playerHp+= 5;
+                            }
+                            if(playerHp +4 == playerMaxHP)
+                            {
+                                playerHp += 4;
+                            }
+                            if(playerHp +3 == playerMaxHP)
+                            {
+                                playerHp += 3;
+                            }
+                            if(playerHp +2 == playerMaxHP)
+                            {
+                                playerHp += 2;
+                            }
+                            if(playerHp +1 == playerMaxHP)
+                            {
+                                playerHp += 1;
+                            }
                         }
-                        if(playerHp +4 == playerMaxHP)
-                        {
-                            playerHp += 4;
-                        }
-                        if(playerHp +3 == playerMaxHP)
-                        {
-                            playerHp += 3;
-                        }
-                        if(playerHp +2 == playerMaxHP)
-                        {
-                            playerHp += 2;
-                        }
-                        if(playerHp +1 == playerMaxHP)
-                        {
-                            playerHp += 1;
-                        }
-                    }
-                    break;
-                    case 2:
+                        restArea = false;
+                        resting = false;
                         break;
-                    case 3:
-                        break;
+                        case 2:
+                            changeEquipment();
+                            resting = false;
+                            break;
+                        case 3:
+                            UseHealingItem();
+                            resting = false;
+                            break;
+                }
             }
         }
     }
@@ -1254,12 +1281,51 @@ static bool LevelUp(int experience, int level)
 }
 
 //Inventory Management 
+void UseHealingItem()
+{
+    bool usingItem = true;
+    while(usingItem)
+    {
+        PrintInventory(backPack);
+        Console.WriteLine("What healing item would you like to use?");
+        Console.WriteLine("Type leave when you are ready to leave.");
+        int itemChoiceInt;
+        string? leaving = Console.ReadLine();
+        bool successItemChoice = int.TryParse(leaving, out itemChoiceInt);
+        itemChoiceInt --;
+        if(successItemChoice && itemChoiceInt < backPack.Length && itemChoiceInt >= 0)
+        {
+            if(backPack[itemChoiceInt] != emptySlot && backPack[itemChoiceInt].name.Contains("Health"))
+            {
+                playerHp += backPack[itemChoiceInt].healBonus;
+                Console.WriteLine($"You heal {backPack[itemChoiceInt].healBonus} hitpoints ");
+                backPack[itemChoiceInt] = emptySlot;
+            }
+            else
+            {
+                Console.WriteLine("That Item is not a healing item, please select a different one or type leave to leave.");
+            }
+        }
+        else if(successItemChoice != true && leaving.ToLower() == "leave")
+        {
+            usingItem = false;
+            Console.WriteLine("You are exiting the inventory");
+        }
+        else
+        {
+            Console.WriteLine("That is not a valid option, try again.");
+        }
+    }
+    
+
+}
 void PrintInventory(Items[] x)
 {
 
     for(int i = 0; i < x.Length; i++)
     {
-        Console.WriteLine($"{i+1}: {x[i].name}");
+        int position = i ++;
+        Console.WriteLine($"{i +2 }: {x[i].name}");
     }
 }
 void PrintShopInventory(Items[] x)
@@ -1309,7 +1375,7 @@ void randRoomGenerator()
     bool determineRoom = true;
     while(determineRoom)
     {
-        int randRoom = rand.Next(1,15);
+        int randRoom = rand.Next(1,20);
         if(bossRoom == true)
         {
             boss_Room();
@@ -1359,11 +1425,17 @@ void randRoomGenerator()
                 {
                     if(roomsAlreadyRolled[2] != "MiniBoss")
                     {
-                    MiniBoss();
-                    roomsAlreadyRolled[3] = "MiniBoss";
-                    determineRoom = false;
+                        MiniBoss();
+                        roomsAlreadyRolled[3] = "MiniBoss";
+                        determineRoom = false;
                     }
+                    determineRoom = false;
                 }
+            else if(randRoom == 15 || randRoom == 16 || randRoom == 17 || randRoom == 18 || randRoom == 19)
+            {
+                RestArea();
+                determineRoom = false;
+            }
 
         }
     }
