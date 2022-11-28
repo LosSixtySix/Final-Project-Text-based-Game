@@ -1357,10 +1357,12 @@ void randRoomGenerator()
                 }
             else if(randRoom == 6)
                 {
+                    if(roomsAlreadyRolled[2] != "MiniBoss")
+                    {
                     MiniBoss();
+                    roomsAlreadyRolled[3] = "MiniBoss";
                     determineRoom = false;
-                    Console.WriteLine(dungeonLevel);
-                    Console.WriteLine(numberOfRooms);
+                    }
                 }
 
         }
@@ -1369,7 +1371,8 @@ void randRoomGenerator()
 }
 void RoomZero()
 {
-
+    Console.Clear();
+    Console.WriteLine("This room will describe the game and tell the rules.");
 }
 void main()
 {
