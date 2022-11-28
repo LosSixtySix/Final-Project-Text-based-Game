@@ -191,6 +191,7 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
     backPack[backPackPlace] = emptySlot;
 }
 backPack.SetValue(magicShield, 0);
+backPack.SetValue(healthPotion, 1);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -594,54 +595,68 @@ bool fledBattle(int randDieRoll)
 // Change Equipment
 void changeEquipment()
 {
+    bool changingEquipment = true;
+    while(changingEquipment)
+    {
     Console.Clear();
     int equipmentChoice;
-    for(int i = 0; i < backPack.Length; i ++)
-    {
-        Console.WriteLine($"{i}: {backPack[i].name}");
-    }
-    bool choosingSlot = true;
-    while(choosingSlot)
-    {
+
+    
+        PrintInventory(backPack);
+        bool choosingSlot = true;
         bool successEquipmentChoice = int.TryParse(Console.ReadLine(), out equipmentChoice);
-
-        if(successEquipmentChoice)
+        while(choosingSlot)
         {
-            Items chosenEquipment = backPack[equipmentChoice];
-            string? equipment = backPack[equipmentChoice].name;
-            if(equipment.Contains("Sword"))
+            
+            equipmentChoice --;
+            if(successEquipmentChoice)
             {
-                backPack[equipmentChoice] = equippedWeapon;
-                equippedWeapon = chosenEquipment;
-                choosingSlot = false;
-                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
-            }
-            else if(equipment.Contains("Shield"))
-            {
-                backPack[equipmentChoice] = equippedShield;
-                equippedShield = chosenEquipment;
-                choosingSlot = false;
-                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
-            }
-            else if(equipment.Contains("Boots"))
-            {
-                backPack[equipmentChoice] = equippedBoots;
-                equippedBoots = chosenEquipment;
-                choosingSlot = false;
-                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
-            }
-            else if(equipment.Contains("Gloves"))
-            {
-                backPack[equipmentChoice] = equippedGloves;
-                equippedGloves = chosenEquipment;
-                choosingSlot = false;
-                Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
-            }
-            else
-            {
-                Console.WriteLine("That is not a valid option, please try again.");
-            }
+                Items chosenEquipment = backPack[equipmentChoice];
+                string? equipment = backPack[equipmentChoice].name;
+                if(equipment.Contains("Sword"))
+                {
+                    backPack[equipmentChoice] = equippedWeapon;
+                    equippedWeapon = chosenEquipment;
+                    choosingSlot = false;
+                    changingEquipment = false;
+                    Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
+                    Console.ReadLine();
+                }
+                else if(equipment.Contains("Shield"))
+                {
+                    backPack[equipmentChoice] = equippedShield;
+                    equippedShield = chosenEquipment;
+                    choosingSlot = false;
+                    changingEquipment = false;
+                    Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
+                    Console.ReadLine();
+                }
+                else if(equipment.Contains("Boots"))
+                {
+                    backPack[equipmentChoice] = equippedBoots;
+                    equippedBoots = chosenEquipment;
+                    choosingSlot = false;
+                    changingEquipment = false;
+                    Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
+                    Console.ReadLine();
+                }
+                else if(equipment.Contains("Gloves"))
+                {
+                    backPack[equipmentChoice] = equippedGloves;
+                    equippedGloves = chosenEquipment;
+                    choosingSlot = false;
+                    changingEquipment = false;
+                    Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("That is not a valid option, press enter and try again.");
+                    choosingSlot = false;
+                    Console.ReadLine();
+                }
 
+            }
         }
     }
 }
@@ -1286,6 +1301,7 @@ void UseHealingItem()
     bool usingItem = true;
     while(usingItem)
     {
+        Console.Clear();
         PrintInventory(backPack);
         Console.WriteLine("What healing item would you like to use?");
         Console.WriteLine("Type leave when you are ready to leave.");
@@ -1304,6 +1320,7 @@ void UseHealingItem()
             else
             {
                 Console.WriteLine("That Item is not a healing item, please select a different one or type leave to leave.");
+                Console.ReadLine();
             }
         }
         else if(successItemChoice != true && leaving.ToLower() == "leave")
@@ -1313,7 +1330,8 @@ void UseHealingItem()
         }
         else
         {
-            Console.WriteLine("That is not a valid option, try again.");
+            Console.WriteLine("That is not a valid option press enter and try again.");
+            Console.ReadLine();
         }
     }
     
@@ -1324,8 +1342,8 @@ void PrintInventory(Items[] x)
 
     for(int i = 0; i < x.Length; i++)
     {
-        int position = i ++;
-        Console.WriteLine($"{i +2 }: {x[i].name}");
+        int position = i + 1;
+        Console.WriteLine($"{position }: {x[i].name}");
     }
 }
 void PrintShopInventory(Items[] x)
