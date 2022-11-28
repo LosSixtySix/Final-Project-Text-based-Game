@@ -598,17 +598,18 @@ void changeEquipment()
     bool changingEquipment = true;
     while(changingEquipment)
     {
-    Console.Clear();
-    int equipmentChoice;
-
-    
+        Console.Clear();
+        int equipmentChoice;
         PrintInventory(backPack);
+        Console.WriteLine("Type 'leave' to exit equipment changing.");
+        string? equipmentChoiceString = Console.ReadLine();
         bool choosingSlot = true;
-        bool successEquipmentChoice = int.TryParse(Console.ReadLine(), out equipmentChoice);
+        bool successEquipmentChoice = int.TryParse(equipmentChoiceString, out equipmentChoice);
         while(choosingSlot)
         {
             
             equipmentChoice --;
+            
             if(successEquipmentChoice)
             {
                 Items chosenEquipment = backPack[equipmentChoice];
@@ -618,7 +619,6 @@ void changeEquipment()
                     backPack[equipmentChoice] = equippedWeapon;
                     equippedWeapon = chosenEquipment;
                     choosingSlot = false;
-                    changingEquipment = false;
                     Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
                     Console.ReadLine();
                 }
@@ -627,7 +627,6 @@ void changeEquipment()
                     backPack[equipmentChoice] = equippedShield;
                     equippedShield = chosenEquipment;
                     choosingSlot = false;
-                    changingEquipment = false;
                     Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
                     Console.ReadLine();
                 }
@@ -636,7 +635,6 @@ void changeEquipment()
                     backPack[equipmentChoice] = equippedBoots;
                     equippedBoots = chosenEquipment;
                     choosingSlot = false;
-                    changingEquipment = false;
                     Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
                     Console.ReadLine();
                 }
@@ -645,7 +643,6 @@ void changeEquipment()
                     backPack[equipmentChoice] = equippedGloves;
                     equippedGloves = chosenEquipment;
                     choosingSlot = false;
-                    changingEquipment = false;
                     Console.WriteLine($"You have succesfully equipped {chosenEquipment.name}.");
                     Console.ReadLine();
                 }
@@ -656,6 +653,11 @@ void changeEquipment()
                     Console.ReadLine();
                 }
 
+            }
+            else if(successEquipmentChoice != true && equipmentChoiceString.ToLower() == "leave")
+            {
+                choosingSlot = false;
+                changingEquipment = false;
             }
         }
     }
