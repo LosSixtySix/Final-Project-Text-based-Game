@@ -63,7 +63,7 @@ bootsofSpeed.intiativeBonus = 5;
 Items magicSword = new Items();
 magicSword.name = "Magic Sword";
 magicSword.level = 2;
-magicSword.attackBonus = 7;
+magicSword.attackBonus = 4 + magicSword.level * 3;
 magicSword.damageDie = dEight;
 
 Items magicShield = new Items();
@@ -87,6 +87,10 @@ sword.damageDie = dSix;
 Items wornBoots = new Items();
 wornBoots.name = "Worn Boots";
 wornBoots.intiativeBonus = 0;
+
+Items wornGloves = new Items();
+wornGloves.name = "Worn Gloves";
+wornGloves.attackBonus = 2;
 
 Items emptySlot = new Items();
 emptySlot.name = "[Empty Slot]";
@@ -178,7 +182,7 @@ Merglex.level = 3;
 Merglex.MonsterAC = 15;
 Merglex.MonsterAttackDamage = 5;
 Merglex.MonsterIntiative = 5;
-Merglex.MonsterHitPoints = 30;
+Merglex.MonsterHitPoints = 25;
 Merglex.experienceWorth = 15;
 
 Monsters Thorn = new Monsters();
@@ -209,7 +213,7 @@ List<Monsters> listOfMiniBossesLevelThree = new List<Monsters>(){Sirnes};
 
 //Player
 Items equippedBackPack = emptySlot;
-Items equippedGloves = emptySlot;
+Items equippedGloves = wornGloves;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
@@ -229,6 +233,7 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 }
 backPack.SetValue(expertHealthPotion, 0);
 backPack.SetValue(RepairArmor, 1);
+backPack.SetValue(expertHealthPotion, 3);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -281,7 +286,7 @@ void combat()
         int temp_monsterHp = ChosenMonster.MonsterHitPoints;
 
     //Values declared in Combat//
-    int playerAC = 10 + Playerlevel + equippedShield.attackBonus;
+    int playerAC = 10 + Playerlevel + equippedShield.attackBonus + equippedGloves.attackBonus;
 
     bool determineHit(int targetAC, int attackBonus)
     {
@@ -293,7 +298,7 @@ void combat()
     }
     int Playerdamage()
     {
-        return equippedWeapon.damageDie + equippedWeapon.damageBouns + playerAttackBonus;
+        return equippedWeapon.damageDie + equippedWeapon.damageBouns + playerAttackBonus + equippedGloves.attackBonus;
     }
     int MonsterDamage(Monsters x)
     {
