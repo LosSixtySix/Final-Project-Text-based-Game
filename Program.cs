@@ -24,7 +24,7 @@ int rollDie(int dice)
 //Dungeon Creator Variables//
 int dungeonLevel = 1;
 int numberOfRooms = 0;
-int maxRooms = 10;
+int maxRooms = 20;
 int maxDungeonLevels = 5;
 bool bossRoom = false;
 string[] roomsAlreadyRolled = new string[maxRooms];
@@ -115,6 +115,10 @@ Items bomb = new Items();
 bomb.name = "Bomb";
 bomb.goldValue = 15;
 
+Items RepairArmor = new Items();
+RepairArmor.name = "Repair Armor Potion";
+RepairArmor.goldValue = 5;
+
 Items throwingAxe = new Items();
 throwingAxe.name = "Throwing Axe";
 throwingAxe.goldValue = 10;
@@ -170,7 +174,7 @@ minotaur.experienceWorth = 5;
 
 Monsters Merglex = new Monsters();
 Merglex.name = "Merglex";
-Merglex.level = 1;
+Merglex.level = 3;
 Merglex.MonsterAC = 15;
 Merglex.MonsterAttackDamage = 5;
 Merglex.MonsterIntiative = 5;
@@ -179,7 +183,7 @@ Merglex.experienceWorth = 15;
 
 Monsters Thorn = new Monsters();
 Thorn.name = "Thorn";
-Thorn.level = 2;
+Thorn.level = 4;
 Thorn.MonsterAC = 17;
 Thorn.MonsterAttackDamage = 10;
 Thorn.MonsterIntiative = 5;
@@ -188,7 +192,7 @@ Thorn.experienceWorth = 30;
 
 Monsters Sirnes = new Monsters();
 Sirnes.name = "Si'rnes";
-Sirnes.level = 3;
+Sirnes.level = 6;
 Sirnes.MonsterAC = 17;
 Sirnes.MonsterAttackDamage = 12;
 Sirnes.MonsterIntiative = 12;
@@ -209,7 +213,7 @@ Items equippedGloves = emptySlot;
 Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
-int goldCount = 0;
+int goldCount = 10;
 int hitPoints = 10;
 int Playerlevel = 1;
 int experience = 0;
@@ -223,8 +227,8 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 {
     backPack[backPackPlace] = emptySlot;
 }
-backPack.SetValue(magicShield, 0);
-backPack.SetValue(healthPotion, 1);
+backPack.SetValue(expertHealthPotion, 0);
+backPack.SetValue(RepairArmor, 1);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -243,6 +247,7 @@ void combat()
         else if(miniBossRoomBool)
         {
             ChosenMonster = listOfMiniBossesLevelOne[0];
+            miniBossRoomBool = false;
         }
     }
     else if(dungeonLevel == 2)
@@ -254,6 +259,7 @@ void combat()
         else if(miniBossRoomBool == true)
         {
             ChosenMonster = listOfMiniBossesLevelTwo[0];
+            miniBossRoomBool = false;
         }
     }
     else if(dungeonLevel == 3)
@@ -265,6 +271,7 @@ void combat()
         else if(miniBossRoomBool == true)
         {
             ChosenMonster = listOfMiniBossesLevelThree[0];
+            miniBossRoomBool = false;
         }
     }
         string monsterPicNumber = monsterPictureType(monsterType(ChosenMonster.name)).ToString();
@@ -440,6 +447,15 @@ void combat()
                                 makeAChoice = false;
                                 monsterTurn = true;
                             }
+                            if(ChosenItem.name.Contains("Armor"))
+                            {
+                                temp_playerAC = playerAC;
+                                backPack[inventoryChoice] = emptySlot;
+                                useInventory = false;
+                                usingItem = false;
+                                Console.WriteLine("Your Armor is restored!");
+                                CheckingInventory = true;
+                            }
                             if(ChosenItem.name.Contains("Health"))
                             {
                                 playerHp += ChosenItem.healBonus;
@@ -448,8 +464,6 @@ void combat()
                                 usingItem = false;
                                 Console.WriteLine($"You heal {ChosenItem.healBonus} points");
                                 CheckingInventory = true;
-                                makeAChoice = false;
-                                monsterTurn = true;
                             }
                             if(ChosenItem.name.Contains("Throwing"))
                             {
@@ -464,6 +478,8 @@ void combat()
                             }
                             if(ChosenItem.name.Contains("Bomb"))
                             {
+                                if(miniBossRoomBool != true && bossRoomBool != true)
+                                {
                                 temp_monsterHp -= ChosenMonster.MonsterHitPoints;
                                 backPack[inventoryChoice] = emptySlot;
                                 useInventory = false;
@@ -472,6 +488,20 @@ void combat()
                                 CheckingInventory = true;
                                 makeAChoice = false;
                                 monsterTurn = true;
+                                }
+                                else if(miniBossRoomBool || bossRoomBool)
+                                {
+                                    int bombDamage = rollDie(dTwenty) +5;
+                                    temp_monsterHp -= bombDamage;
+                                    temp_MonsterAC -= bombDamage;
+                                    backPack[inventoryChoice] = emptySlot;
+                                    useInventory = false;
+                                    usingItem = false;
+                                    Console.WriteLine($"You use a {ChosenItem.name} on {ChosenMonster.name}.");
+                                    CheckingInventory = true;
+                                    makeAChoice = false;
+                                    monsterTurn = true;
+                                }
                             }
                             else if(ChosenItem == emptySlot)
                             {
@@ -1450,7 +1480,7 @@ void randRoomGenerator()
     {
         numberOfRooms = 0;
         dungeonLevel ++;
-        for(int i = 0; i< roomsAlreadyRolled.Count(); i++)
+        for(int i = 0; i< roomsAlreadyRolled.Length; i++)
         {
             roomsAlreadyRolled[i] = "Null";
         }
@@ -1484,6 +1514,7 @@ void randRoomGenerator()
                             determineRoom = false;
                         }
                     }
+
                 }
             else if(randRoom == 2)
                 {
@@ -1492,8 +1523,21 @@ void randRoomGenerator()
                 }
             else if(randRoom == 3 || randRoom == 7 || randRoom == 8 || randRoom == 14)
                 {
-                    ItemDropRoom();
-                    determineRoom = false;
+                    if(roomsAlreadyRolled[3] != "ItemDropRoom" && roomsAlreadyRolled[4] != "ItemDropRoom" )
+                    {
+                        ItemDropRoom();
+                        if(roomsAlreadyRolled[3] != "ItemDropRoom")
+                        {
+                            determineRoom = false;
+                            roomsAlreadyRolled[3] = "ItemDropRoom";
+                        }
+                        else if(roomsAlreadyRolled[3] == "ItemDropRoom")
+                        {
+                            determineRoom = false;
+                            roomsAlreadyRolled[4] = "ItemDropRoom";
+                        }
+                    }
+
                 }
             else if(randRoom == 4 || randRoom == 11 || randRoom == 12 || randRoom == 13)
                 {
@@ -1510,15 +1554,27 @@ void randRoomGenerator()
                     if(roomsAlreadyRolled[2] != "MiniBoss")
                     {
                         miniBossRoomBool = MiniBoss();
-                        roomsAlreadyRolled[3] = "MiniBoss";
+                        roomsAlreadyRolled[2] = "MiniBoss";
                         determineRoom = false;
                     }
                     determineRoom = false;
                 }
             else if(randRoom == 15 || randRoom == 16 || randRoom == 17 || randRoom == 18 || randRoom == 19)
             {
-                RestArea();
-                determineRoom = false;
+                    if(roomsAlreadyRolled[5] != "RestArea" && roomsAlreadyRolled[6] != "RestArea" )
+                    {
+                        RestArea();
+                        if(roomsAlreadyRolled[5] != "RestArea")
+                        {
+                            determineRoom = false;
+                            roomsAlreadyRolled[5] = "RestArea";
+                        }
+                        else if(roomsAlreadyRolled[5] == "RestArea")
+                        {
+                            determineRoom = false;
+                            roomsAlreadyRolled[6] = "RestArea";
+                        }
+                    }
             }
 
         }
@@ -1611,8 +1667,11 @@ void main()
             }
         }
     }
+    if(playerHp> 0)
+    {
     Console.WriteLine("You have beaten the final boss, Congratualtions! You have won! Press Enter to leave the game.");
     Console.ReadLine();
+    }
 }
 class Monsters
 {
