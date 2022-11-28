@@ -13,6 +13,8 @@ int dFive = 6;
 int dTen = 11;
 int dThree = 4;
 bool playGame = true;
+bool bossRoomBool = false;
+bool miniBossRoomBool = false;
 
 int rollDie(int dice)
 {
@@ -166,9 +168,40 @@ minotaur.MonsterIntiative = 4;
 minotaur.MonsterHitPoints = 10;
 minotaur.experienceWorth = 5;
 
+Monsters Merglex = new Monsters();
+Merglex.name = "Merglex";
+Merglex.level = 1;
+Merglex.MonsterAC = 15;
+Merglex.MonsterAttackDamage = 5;
+Merglex.MonsterIntiative = 5;
+Merglex.MonsterHitPoints = 30;
+Merglex.experienceWorth = 15;
+
+Monsters Thorn = new Monsters();
+Thorn.name = "Thorn";
+Thorn.level = 2;
+Thorn.MonsterAC = 17;
+Thorn.MonsterAttackDamage = 10;
+Thorn.MonsterIntiative = 5;
+Thorn.MonsterHitPoints = 40;
+Thorn.experienceWorth = 30;
+
+Monsters Sirnes = new Monsters();
+Sirnes.name = "Si'rnes";
+Sirnes.level = 3;
+Sirnes.MonsterAC = 17;
+Sirnes.MonsterAttackDamage = 12;
+Sirnes.MonsterIntiative = 12;
+Sirnes.MonsterHitPoints = 40;
+Sirnes.experienceWorth = 40;
+
 List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur, skeleton, skeleton, skeleton, rat, rat, rat, rat, rat, rat};
 List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
 List<Monsters> listOfMonstersLevelThree = new List<Monsters>(){minotaur};
+
+List<Monsters> listOfMiniBossesLevelOne = new List<Monsters>(){Merglex};
+List<Monsters> listOfMiniBossesLevelTwo = new List<Monsters>(){Thorn};
+List<Monsters> listOfMiniBossesLevelThree = new List<Monsters>(){Sirnes};
 
 //Player
 Items equippedBackPack = emptySlot;
@@ -202,16 +235,37 @@ void combat()
     Monsters ChosenMonster = listOfMonstersLevelOne[0];
     if(dungeonLevel == 1)
     {
+        if(miniBossRoomBool != true)
+        {
         int randoMonster = rollDie(dTen - 1);
-        ChosenMonster = listOfMonstersLevelOne[randoMonster]; 
+            ChosenMonster = listOfMonstersLevelOne[randoMonster]; 
+        }
+        else if(miniBossRoomBool)
+        {
+            ChosenMonster = listOfMiniBossesLevelOne[0];
+        }
     }
     else if(dungeonLevel == 2)
     {
-        ChosenMonster = listOfMonstersLevelTwo[0];
+        if(miniBossRoomBool != true)
+        {
+            ChosenMonster = listOfMonstersLevelTwo[0];
+        }
+        else if(miniBossRoomBool == true)
+        {
+            ChosenMonster = listOfMiniBossesLevelTwo[0];
+        }
     }
     else if(dungeonLevel == 3)
     {
-        ChosenMonster = listOfMonstersLevelThree[0];
+        if(miniBossRoomBool != true)
+        {
+            ChosenMonster = listOfMonstersLevelThree[0];
+        }
+        else if(miniBossRoomBool == true)
+        {
+            ChosenMonster = listOfMiniBossesLevelThree[0];
+        }
     }
         string monsterPicNumber = monsterPictureType(monsterType(ChosenMonster.name)).ToString();
         string monsterPic = $"monster{monsterPicNumber}.txt";
@@ -1273,15 +1327,13 @@ void RestArea()
         }
     }
 }
-void MiniBoss()
+static bool MiniBoss()
 {
-    Console.Clear();
-    Console.WriteLine("This is a mini Boss room");
+    return true;
 }
-void boss_Room()
+static bool boss_Room()
 {
-    Console.Clear();
-    Console.WriteLine("This is the boss room");
+    return true;
 }
 //Level Up Method//
 static int ExperienceGain(Monsters x, int experience)
@@ -1398,7 +1450,7 @@ void randRoomGenerator()
         int randRoom = rand.Next(1,20);
         if(bossRoom == true)
         {
-            boss_Room();
+           bossRoomBool = boss_Room();
             bossRoom = false;
         }
         else if(bossRoom != true)
@@ -1445,7 +1497,7 @@ void randRoomGenerator()
                 {
                     if(roomsAlreadyRolled[2] != "MiniBoss")
                     {
-                        MiniBoss();
+                        miniBossRoomBool = MiniBoss();
                         roomsAlreadyRolled[3] = "MiniBoss";
                         determineRoom = false;
                     }
