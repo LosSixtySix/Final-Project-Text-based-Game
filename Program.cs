@@ -1,4 +1,4 @@
-﻿//Jonathan Hoyt 11/4/2022 Final Project. ASCII Art taken from https://www.asciiart.eu
+﻿//Jonathan Hoyt 11/4/2022 Final Project. ASCII Art taken from https://www.asciiart.eu. Riddles taken from the Hobbit.
 
 Console.Clear();
 
@@ -26,7 +26,7 @@ int rollDie(int dice)
 int dungeonLevel = 1;
 int numberOfRooms = 0;
 int maxRooms = 20;
-int maxDungeonLevels = 5;
+int maxDungeonLevels = 4;
 bool bossRoom = false;
 string[] roomsAlreadyRolled = new string[maxRooms];
 
@@ -50,11 +50,6 @@ void printCastle()
         temp_x++;
     }
 }
-
-//Game Start//
-
-
-
 
 //Items
 Items bootsofSpeed = new Items();
@@ -144,9 +139,36 @@ for(int shopListPlace = 0; shopListPlace < shopList.Length; shopListPlace++)
     shopList[shopListPlace] = emptySlot;
 }
 
+//Traps//
+Traps sandPit = new Traps();
+sandPit.name = "Sand Pit";
+sandPit.trapDamageDie = dSix;
+sandPit.maxTurnsToSolve = 5;
 
+List<Traps> trapRoomPullList = new List<Traps>(){sandPit};
 
+//Riddles for Trap Room//
+TrapRiddles riddle1 = new TrapRiddles();
+riddle1.name = File.ReadAllText("riddle1.txt");
+riddle1.answer = "mountain";
 
+TrapRiddles riddle2 = new TrapRiddles();
+riddle2.name = File.ReadAllText("riddle2.txt");
+riddle2.answer = "wind";
+
+TrapRiddles riddle3 = new TrapRiddles();
+riddle3.name = File.ReadAllText("riddle3.txt");
+riddle3.answer = "dark";
+
+TrapRiddles riddle4 = new TrapRiddles();
+riddle4.name = File.ReadAllText("riddle4.txt");
+riddle4.answer = "fish";
+
+TrapRiddles riddle5 = new TrapRiddles();
+riddle5.name = File.ReadAllText("riddle5.txt");
+riddle5.answer = "time";
+
+List<TrapRiddles> riddles = new List<TrapRiddles>(){riddle1, riddle2, riddle3, riddle4, riddle5};
 
 //Monsters//
 
@@ -367,6 +389,11 @@ void combat()
                 Console.WriteLine($"Hit Points: {playerHp}");
                 Console.WriteLine($"AC:{temp_playerAC}");
                 Console.WriteLine("(1) Attack! (2) Use Item (3) Raise Shield (4) Run Away!!");
+                if(PlayerOwnedTraits.Contains(TrollBlood))
+                {
+                    Console.WriteLine("Because of your trollish nature you have healed somewhat");
+                    playerHp += TrollBlood.healthBonus;
+                }
                 int choice;
                 int damageDealt = Playerdamage();
                 bool successChoice = int.TryParse(Console.ReadLine(), out choice);
@@ -818,9 +845,6 @@ void changeEquipment()
         }
     }
 }
-
-//Rooms
-
 
 ///SHOP///
 void shop()
@@ -1368,8 +1392,49 @@ void ItemDropRoom()
 }
 void TrapRoom()
 {
+
     Console.Clear();
-    Console.WriteLine("It's a TRAP!!");
+    int randoNumber = rand.Next(0, trapRoomPullList.Count);
+    Traps randoTrap = trapRoomPullList[randoNumber];
+    Console.WriteLine($"You have fallen into a {randoTrap.name}!!");
+    Console.WriteLine($"You must solve the riddle within the time frame of {randoTrap.maxTurnsToSolve}, or else you will lose life");
+    Console.ReadLine();
+    int randoNumberTwo = rand.Next(0, riddles.Count());
+    int turnCount = 0;
+    TrapRiddles riddle = riddles[randoNumberTwo];
+    int userAnswerInt;
+    bool solvingTrap = true;
+    while(solvingTrap)
+    {
+        Console.Clear();
+        Console.WriteLine($"Turns Left: {randoTrap.maxTurnsToSolve- turnCount}");
+        if(turnCount >= randoTrap.maxTurnsToSolve)
+        {
+            Console.WriteLine("You have run out of time.");
+            playerHp -= rollDie(randoTrap.trapDamageDie) + 5;
+        }
+        Console.WriteLine(riddle.name);
+        string? answer = Console.ReadLine();
+        bool succesfulAnswer = int.TryParse(answer, out userAnswerInt);
+        if(succesfulAnswer == false)
+        {
+            if(answer.ToLower() == riddle.answer)
+            {
+                Console.WriteLine("You have solved the riddle! You escape unscathed!");
+                solvingTrap = false;
+            }
+            else if(answer.ToLower() != riddle.answer)
+            {
+                Console.WriteLine("That answer is not correct, time is passing....");
+                turnCount++;
+            }
+        }
+        else if(succesfulAnswer)
+        {
+            Console.WriteLine("That is not a valid response, time passess....");
+            turnCount++;
+        }
+    }
 }
 void RestArea()
 {
@@ -1710,7 +1775,7 @@ void main()
         Console.ReadLine();
         RoomZero();
         Console.ReadLine();
-        while(numberOfRooms <= maxRooms && playGame)
+        while(playGame)
         {
             if(dungeonLevel < maxDungeonLevels)
             {
@@ -1782,4 +1847,16 @@ class Traits
     public int healthBonus;
     public int AcBonus;
 
+}
+
+class Traps
+{
+    public string? name;
+    public int trapDamageDie;
+    public int maxTurnsToSolve;
+}
+class TrapRiddles 
+{
+    public string? name;
+    public string? answer;
 }
