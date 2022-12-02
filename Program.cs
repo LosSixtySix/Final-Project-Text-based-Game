@@ -226,6 +226,35 @@ Sirnes.MonsterIntiative = 12;
 Sirnes.MonsterHitPoints = 40;
 Sirnes.experienceWorth = 40;
 
+//Floor bosses//
+Monsters WyrmWood = new Monsters();
+WyrmWood.name = "Wyrm Wood";
+WyrmWood.level = 4;
+WyrmWood.MonsterAC = 22;
+WyrmWood.MonsterAttackDamage = 10;
+WyrmWood.MonsterIntiative = 6;
+WyrmWood.MonsterHitPoints = 35;
+WyrmWood.experienceWorth = 30;
+
+Monsters Flayer = new Monsters();
+Flayer.name = "The Flayer";
+Flayer.level = 5;
+Flayer.MonsterAC = 16;
+Flayer.MonsterAttackDamage = 4;
+Flayer.MonsterIntiative = 15;
+Flayer.MonsterHitPoints =35;
+Flayer.experienceWorth =50;
+
+Monsters DreadChoir = new Monsters();
+DreadChoir.name = "The Dread Choir";
+DreadChoir.level = 7;
+DreadChoir.MonsterAC =12;
+DreadChoir.MonsterAttackDamage = 2;
+DreadChoir.MonsterIntiative = 12;
+DreadChoir.MonsterHitPoints = 70;
+DreadChoir.experienceWorth = 75;
+
+
 List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur, skeleton, skeleton, skeleton, rat, rat, rat, rat, rat, rat};
 List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
 List<Monsters> listOfMonstersLevelThree = new List<Monsters>(){minotaur};
@@ -286,11 +315,16 @@ void combat()
 {
     // Determine monster type
     Monsters ChosenMonster = listOfMonstersLevelOne[0];
+    string bossNumber = dungeonLevel.ToString();
     if(dungeonLevel == 1)
     {
-        if(miniBossRoomBool != true)
+        if(bossRoomBool)
         {
-        int randoMonster = rollDie(dTen - 1);
+            ChosenMonster = WyrmWood;
+        }
+        else if(miniBossRoomBool != true)
+        {
+            int randoMonster = rollDie(dTen - 1);
             ChosenMonster = listOfMonstersLevelOne[randoMonster]; 
         }
         else if(miniBossRoomBool)
@@ -301,7 +335,11 @@ void combat()
     }
     else if(dungeonLevel == 2)
     {
-        if(miniBossRoomBool != true)
+        if(bossRoomBool)
+        {
+            ChosenMonster = Flayer;
+        }
+        else if(miniBossRoomBool != true)
         {
             ChosenMonster = listOfMonstersLevelTwo[0];
         }
@@ -313,7 +351,11 @@ void combat()
     }
     else if(dungeonLevel == 3)
     {
-        if(miniBossRoomBool != true)
+        if(bossRoomBool)
+        {
+            ChosenMonster = DreadChoir;
+        }
+        else if(miniBossRoomBool != true)
         {
             ChosenMonster = listOfMonstersLevelThree[0];
         }
@@ -323,12 +365,20 @@ void combat()
             miniBossRoomBool = false;
         }
     }
+    string monsterPic = "";
+    if(bossRoomBool != true)
+    {
         string monsterPicNumber = monsterPictureType(monsterType(ChosenMonster.name)).ToString();
-        string monsterPic = $"monster{monsterPicNumber}.txt";
+        monsterPic = $"monster{monsterPicNumber}.txt";
+    }
+    else if(bossRoomBool)
+    {
+        monsterPic = $"boss{bossNumber}.txt";
+    }
         string [] monsterRows = File.ReadAllLines($"{monsterPic}");
         char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
         int temp_monsterHp = ChosenMonster.MonsterHitPoints;
-
+    
     //Values declared in Combat//
     int playerAC = 10 + Playerlevel + equippedShield.attackBonus + equippedGloves.attackBonus;
 
