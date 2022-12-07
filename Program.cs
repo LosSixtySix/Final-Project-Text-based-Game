@@ -1,4 +1,4 @@
-﻿//Jonathan Hoyt 11/4/2022 Final Project. ASCII Art taken from https://www.asciiart.eu. Riddles taken from the Hobbit.
+﻿//Jonathan Hoyt 11/4/2022 Final Project. ASCII Art taken from https://www.asciiart.eu. Riddles taken from J.R.R Tolkien's The Hobbit.
 
 Console.Clear();
 
@@ -24,7 +24,7 @@ int rollDie(int dice)
 
 //Dungeon Creator Variables//
 int dungeonLevel = 1;
-int numberOfRooms = 0;
+int numberOfRooms = 14;
 int maxRooms = 20;
 int maxDungeonLevels = 4;
 bool bossRoom = false;
@@ -264,6 +264,7 @@ List<Monsters> listOfMiniBossesLevelTwo = new List<Monsters>(){Thorn};
 List<Monsters> listOfMiniBossesLevelThree = new List<Monsters>(){Sirnes};
 
 //Player
+
     //level up traits
 Traits weaponProficeny = new Traits();
 weaponProficeny.name = "Weapon Mastery";
@@ -291,7 +292,7 @@ Items equippedWeapon = sword;
 Items equippedShield = shield;
     //Player Variables
 int goldCount = 10;
-int hitPoints = 10;
+int hitPoints = 20;
 int Playerlevel = 1;
 int experience = 0;
 int inventoryCount = 5;
@@ -664,7 +665,7 @@ void combat()
         }
         while(monsterTurn)
         {
-            printMonster();
+            printMonster(monsterPictureType(monsterType(ChosenMonster.name)));
             Console.WriteLine($"HP: {temp_monsterHp}");
             bool hit = determineHit(temp_playerAC, ChosenMonster.level*2);
             int monsterDamageDealt = MonsterDamage(ChosenMonster);
@@ -679,10 +680,18 @@ void combat()
                 Console.ReadLine();
                 if(LevelUp(experience,Playerlevel))
                 {
-                    bool levelingUp = true;
+                    bool levelingUp = false;
+                    if(PlayerOwnedTraits.Count() > 10)
+                    {
+                        levelingUp = true;
+                    }
+                    else if(PlayerOwnedTraits.Count() >= 10)
+                    {
+                       Console.WriteLine("You have leveld up! You have no empty trait slots.");
+                       Console.ReadLine(); 
+                    }
                     while(levelingUp)
                     {
-                        Console.Clear();
                         Console.WriteLine("You have gained enough experience that you have leveled up!!");
                         Console.WriteLine("What trait would you like to gain?");
                         for(int traitPosition = 0; traitPosition < listOfAttainableTraits.Count(); traitPosition++)
@@ -711,9 +720,9 @@ void combat()
                                 choosingTrait = false;
                             }
                         }
-                        Playerlevel++;
-                        experience = 0;
                     }
+                    Playerlevel++;
+                    experience = 0;
                 }
 
             }
@@ -757,11 +766,11 @@ void combat()
     }
 
 
-    void printMonster()
+    void printMonster(int x)
     {
         Console.Clear();
         int temp_y = 0;
-        while(temp_y < 23)
+        while(temp_y < x)
         {
             string temp_row ="";
             for(int i = 0; i < monsterRows[0].Length; i++)
@@ -779,27 +788,27 @@ static int monsterType(string name)
 {
     if(name == "Minotaur")
     {
-        return 1;
+        return 23;
     }
     else if(name == "Skeleton")
     {
-        return 2;
+        return 27;
     }
     else if(name == "Dire Rat")
     {
-        return 3;
+        return 14;
     }
     else if(name == "Merglex")
     {
-        return 4;
+        return 15;
     }
     else if(name == "Si'rnes")
     {
-        return 5;
+        return 25;
     }
     else if(name == "Thorn")
     {
-        return 6;
+        return 28;
     }
     return 1;
 }
@@ -1356,14 +1365,16 @@ void ItemDropRoom()
 {
     Console.Clear();
     Console.WriteLine("You come across a storage looking room and decide to rumage through it for anything useful....");
+    Console.ReadLine();
     int randoDrop = rand.Next(0, itemRoomPullList.Count);
     Items droppedItem = itemRoomPullList[randoDrop];
-    Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
-    PrintInventory(backPack);
     int decisionsMade = 0;
     bool makingDecision = true;
     while(makingDecision)
     {
+        Console.Clear();
+        Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
+        PrintInventory(backPack);
         string? terminalInput = Console.ReadLine();
         int pickingUpItemInt;
         bool successDecision = int.TryParse(terminalInput, out pickingUpItemInt);
@@ -1458,15 +1469,19 @@ void TrapRoom()
     {
         Console.Clear();
         Console.WriteLine($"Turns Left: {randoTrap.maxTurnsToSolve- turnCount}");
-        if(turnCount >= randoTrap.maxTurnsToSolve)
-        {
-            Console.WriteLine("You have run out of time.");
-            playerHp -= rollDie(randoTrap.trapDamageDie) + 5;
-        }
         Console.WriteLine(riddle.name);
         string? answer = Console.ReadLine();
         bool succesfulAnswer = int.TryParse(answer, out userAnswerInt);
-        if(succesfulAnswer == false)
+        if(turnCount >= randoTrap.maxTurnsToSolve)
+        {
+            Console.WriteLine("You have run out of time.");
+            solvingTrap =false;
+            int trapDamage = rollDie(randoTrap.trapDamageDie) + 5;
+            playerHp -= trapDamage;
+            Console.WriteLine($"You have lost {trapDamage} hit points");
+            Console.ReadLine();
+        }
+        else if (succesfulAnswer == false)
         {
             if(answer.ToLower() == riddle.answer)
             {
@@ -1491,12 +1506,12 @@ void RestArea()
     bool restArea = true;
     while(restArea)
     {
-        Console.Clear();
-        Console.WriteLine("You find an area that seems safe enough to rest, what would you like to do before you sleep?");
-        Console.WriteLine("1: Rest 2: Change Equipment 3: Use a Health Item");
         bool resting = true;
         while(resting)
         {
+            Console.Clear();
+            Console.WriteLine("You find an area that seems safe enough to rest, what would you like to do before you sleep?");
+            Console.WriteLine("1: Rest 2: Change Equipment 3: Use a Health Item");
             int choiceInt;
             bool successChoice = int.TryParse(Console.ReadLine(), out choiceInt);
             if(successChoice)
@@ -1666,7 +1681,6 @@ void randRoomGenerator()
     if(numberOfRooms == maxRooms)
     {
         numberOfRooms = 0;
-        dungeonLevel ++;
         for(int i = 0; i< roomsAlreadyRolled.Length; i++)
         {
             roomsAlreadyRolled[i] = "Null";
@@ -1679,17 +1693,21 @@ void randRoomGenerator()
         int randRoom = rand.Next(1,20);
         if(bossRoom == true)
         {
-           bossRoomBool = boss_Room();
+            bossRoomBool = boss_Room();
+            combat();
+            dungeonLevel ++;
             bossRoom = false;
+            bossRoomBool = false;
+            determineRoom = false;
         }
         else if(bossRoom != true)
         {
-            numberOfRooms++;
             if(randRoom == 1)
                 {
                     if(roomsAlreadyRolled[0] != "Shop" && roomsAlreadyRolled[1] != "Shop")
                     {
                         shop();
+                        numberOfRooms++;
                         if(roomsAlreadyRolled[0] != "Shop")
                         {
                             roomsAlreadyRolled[0] = "Shop";
@@ -1706,6 +1724,7 @@ void randRoomGenerator()
             else if(randRoom == 2)
                 {
                     TresureRoom();
+                    numberOfRooms++;
                     determineRoom = false;
                 }
             else if(randRoom == 3 || randRoom == 7 || randRoom == 8 || randRoom == 14)
@@ -1713,6 +1732,7 @@ void randRoomGenerator()
                     if(roomsAlreadyRolled[3] != "ItemDropRoom" && roomsAlreadyRolled[4] != "ItemDropRoom" )
                     {
                         ItemDropRoom();
+                        numberOfRooms++;
                         if(roomsAlreadyRolled[3] != "ItemDropRoom")
                         {
                             determineRoom = false;
@@ -1729,18 +1749,25 @@ void randRoomGenerator()
             else if(randRoom == 4 || randRoom == 11 || randRoom == 12 || randRoom == 13)
                 {
                     combat();
+                    numberOfRooms++;
                     determineRoom = false;
                 }
             else if(randRoom == 5 || randRoom == 9 || randRoom == 10)
                 {
                     TrapRoom();
+                    numberOfRooms++;
                     determineRoom = false;
                 }
             else if(randRoom == 6)
                 {
                     if(roomsAlreadyRolled[2] != "MiniBoss")
                     {
+                        Console.WriteLine("Calling Mini Boss");
+                        Console.ReadLine();
                         miniBossRoomBool = MiniBoss();
+                        combat();
+                        miniBossRoomBool = false;
+                        numberOfRooms++;
                         roomsAlreadyRolled[2] = "MiniBoss";
                         determineRoom = false;
                     }
@@ -1751,6 +1778,7 @@ void randRoomGenerator()
                     if(roomsAlreadyRolled[5] != "RestArea" && roomsAlreadyRolled[6] != "RestArea" )
                     {
                         RestArea();
+                        numberOfRooms++;
                         if(roomsAlreadyRolled[5] != "RestArea")
                         {
                             determineRoom = false;
@@ -1771,7 +1799,14 @@ void randRoomGenerator()
 void RoomZero()
 {
     Console.Clear();
-    Console.WriteLine("This room will describe the game and tell the rules.");
+    Console.WriteLine("You have heard tale of this ancient castle before, but wouldv'e never dare to seek it out were it not for the call of your king.");
+    Console.WriteLine("You knelled before the dying king then, his weak voice barely escaping his mouth but you heard them none the less, \"Terath go there and seek out the orb\".");
+    Console.WriteLine("The kingdom had been failing for some time, and you knew what the orb would mean to your dead king, you must fulfill his final wish.");
+
+    Console.WriteLine($"There are {maxDungeonLevels} with {maxRooms} each level. The goal is to reach the highest level and slay The Dread Choir, unholy clerics cursed to guard the orb forever.");
+    Console.WriteLine("As you defeat enemies you will gain xp points that will evantually increase your level, raising your damage and hitpoints");
+    Console.WriteLine("Some rooms will have items, it will ask to select a slot, use a number to select a slot to place the item.");
+    Console.WriteLine("Good Luck!");
 }
 void main()
 {
@@ -1830,17 +1865,15 @@ void main()
             if(dungeonLevel < maxDungeonLevels)
             {
                 randRoomGenerator();
-                Console.WriteLine("Press Enter to continue");
-                Console.ReadLine();
                 if(PlayerOwnedTraits.Contains(weaponProficeny) && weaponProficenyBool)
                 {
                     equippedWeapon.level *= 2;
                     weaponProficenyBool = false;
                     
                 }
-                if(hardCoreMode == false && playerHp >0)
+                if(hardCoreMode == false && playerHp >0 && playerHp < playerMaxHP)
                 {
-                    if(playerHp +2< playerMaxHP)
+                    if(playerHp +2< playerMaxHP && playerHp> 0)
                     {
                         Console.WriteLine("You rest a little and heal 2 HP");
                         Console.ReadLine();
@@ -1858,6 +1891,8 @@ void main()
             {
                 playGame = false;
             }
+            Console.WriteLine("Press Enter to continue");
+            Console.ReadLine();
         }
     }
     if(playerHp> 0)
