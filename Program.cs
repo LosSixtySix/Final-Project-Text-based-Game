@@ -26,7 +26,7 @@ int rollDie(int dice)
 int dungeonLevel = 1;
 int numberOfRooms = 1;
 int maxRooms = 20;
-int maxDungeonLevels = 4;
+int maxDungeonLevels = 3;
 bool bossRoom = false;
 string[] roomsAlreadyRolled = new string[maxRooms];
 
@@ -234,7 +234,7 @@ Sirnes.MonsterHitPoints = 40;
 Sirnes.experienceWorth = 40;
 
 //Floor bosses//
-Monsters WyrmWood = new Monsters();
+Boss WyrmWood = new Boss();
 WyrmWood.name = "Wyrm Wood";
 WyrmWood.level = 4;
 WyrmWood.MonsterAC = 22;
@@ -242,8 +242,11 @@ WyrmWood.MonsterAttackDamage = 10;
 WyrmWood.MonsterIntiative = 6;
 WyrmWood.MonsterHitPoints = 35;
 WyrmWood.experienceWorth = 30;
+WyrmWood.abilityName = "Rot";
+WyrmWood.abilityDamageDie = dThree;
+WyrmWood.abilityUseChance = dFour;
 
-Monsters Flayer = new Monsters();
+Boss Flayer = new Boss();
 Flayer.name = "The Flayer";
 Flayer.level = 5;
 Flayer.MonsterAC = 16;
@@ -251,8 +254,11 @@ Flayer.MonsterAttackDamage = 4;
 Flayer.MonsterIntiative = 15;
 Flayer.MonsterHitPoints =35;
 Flayer.experienceWorth =50;
+Flayer.abilityName = "Flay";
+Flayer.abilityDamageDie = dTwenty;
+Flayer.abilityUseChance = dThree;
 
-Monsters DreadChoir = new Monsters();
+Boss DreadChoir = new Boss();
 DreadChoir.name = "The Dread Choir";
 DreadChoir.level = 7;
 DreadChoir.MonsterAC =12;
@@ -260,7 +266,9 @@ DreadChoir.MonsterAttackDamage = 2;
 DreadChoir.MonsterIntiative = 12;
 DreadChoir.MonsterHitPoints = 70;
 DreadChoir.experienceWorth = 75;
-
+DreadChoir.abilityName = "Dead God Magic";
+DreadChoir.abilityDamageDie = dTwenty *2;
+DreadChoir.abilityUseChance = dSix;
 
 List<Monsters> listOfMonstersLevelOne = new List<Monsters>(){minotaur, skeleton, skeleton, skeleton, rat, rat, rat, rat, rat, rat};
 List<Monsters> listOfMonstersLevelTwo = new List<Monsters>(){minotaur};
@@ -300,7 +308,7 @@ Items equippedShield = shield;
     //Player Variables
 int goldCount = 20;
 int hitPoints = 30;
-int Playerlevel = 1;
+int Playerlevel = 500;
 int experience = 0;
 int inventoryCount = 5;
 Items [] backPack = new Items[inventoryCount];
@@ -321,6 +329,7 @@ char[][] knightChar = knightRows.Select(items => items.ToArray()).ToArray();
 void combat()
 {
     // Determine monster type
+    Boss FloorBoss = WyrmWood;
     Monsters ChosenMonster = listOfMonstersLevelOne[0];
 
     //Help to print the boss correctly//
@@ -347,7 +356,7 @@ void combat()
     {
         if(bossRoomBool)
         {
-            ChosenMonster = WyrmWood;
+            FloorBoss = WyrmWood;
         }
         else if(miniBossRoomBool != true)
         {
@@ -364,7 +373,7 @@ void combat()
     {
         if(bossRoomBool)
         {
-            ChosenMonster = Flayer;
+            FloorBoss = Flayer;
         }
         else if(miniBossRoomBool != true)
         {
@@ -380,7 +389,7 @@ void combat()
     {
         if(bossRoomBool)
         {
-            ChosenMonster = DreadChoir;
+            FloorBoss = DreadChoir;
         }
         else if(miniBossRoomBool != true)
         {
@@ -405,6 +414,10 @@ void combat()
         string [] monsterRows = File.ReadAllLines($"{monsterPic}");
         char [][] monsterChar = monsterRows.Select(item => item.ToArray()).ToArray();
         int temp_monsterHp = ChosenMonster.MonsterHitPoints;
+        if(bossRoomBool)
+        {
+            temp_monsterHp = FloorBoss.MonsterHitPoints;
+        }
     
     //Values declared in Combat//
     int playerAC = 10 + Playerlevel + equippedShield.attackBonus + equippedGloves.attackBonus;
@@ -452,17 +465,32 @@ void combat()
     bool fight = true;
     int temp_playerAC = playerAC;
     int temp_MonsterAC = ChosenMonster.MonsterAC;
+    if(bossRoomBool)
+    {
+        temp_MonsterAC = FloorBoss.MonsterAC;
+    }
+    int rotTurns = 0;
     while(fight)
     {
         
 
-
         while(playerTurn)
-        {   
+        {  
+                if(rotTurns > 0)
+                {
+                    Console.Clear();
+                    int rotDamage = rollDie(FloorBoss.abilityDamageDie);
+                    playerHp -= rotDamage;
+                    rotTurns --;
+                    temp_monsterHp += rotDamage;
+                    Console.WriteLine($"You are rotting from the outside in... you take {rotDamage} damage and Wyrmwood heals {rotDamage} points.");
+                    Console.ReadLine();
+                } 
             bool makeAChoice = true;
             while(makeAChoice)
             {
-            printKnight();
+
+                printKnight();
                 Console.WriteLine($"Hit Points: {playerHp}");
                 Console.WriteLine($"AC:{temp_playerAC}");
                 Console.WriteLine("(1) Attack! (2) Use Item (3) Raise Shield (4) Run Away!!");
@@ -689,87 +717,199 @@ void combat()
 
 
         }
+        int attemptedUses = 0;
         while(monsterTurn)
         {
-            printMonster(monsterPictureType(monsterType(ChosenMonster.name)));
-            Console.WriteLine($"HP: {temp_monsterHp}");
-            bool hit = determineHit(temp_playerAC, ChosenMonster.level*2);
-            int monsterDamageDealt = MonsterDamage(ChosenMonster);
-            if(temp_monsterHp <= 0)
+            if(bossRoomBool == false)
             {
-                fight = false;
-                Console.WriteLine($"You have defeated the {ChosenMonster.name}!!");
-                int goldGain = rollDie(dEight) + (ChosenMonster.level *4);
-                goldCount += goldGain;
-                Console.WriteLine($"You gained {goldGain} gold pieces");
-                experience = ExperienceGain(ChosenMonster, experience);
-
-                if(LevelUp(experience,Playerlevel))
+                printMonster(monsterPictureType(monsterType(ChosenMonster.name)));
+                Console.WriteLine($"HP: {temp_monsterHp}");
+                bool hit = determineHit(temp_playerAC, ChosenMonster.level*2);
+                int monsterDamageDealt = MonsterDamage(ChosenMonster);
+                if(temp_monsterHp <= 0)
                 {
-                    bool levelingUp = false;
-                    if(PlayerOwnedTraits.Count() > 10)
+                    fight = false;
+                    Console.WriteLine($"You have defeated the {ChosenMonster.name}!!");
+                    int goldGain = rollDie(dEight) + (ChosenMonster.level *4);
+                    goldCount += goldGain;
+                    Console.WriteLine($"You gained {goldGain} gold pieces");
+                    experience = ExperienceGain(ChosenMonster, experience);
+
+                    if(LevelUp(experience,Playerlevel))
                     {
-                        levelingUp = true;
-                    }
-                    else if(PlayerOwnedTraits.Count() >= 10)
-                    {
-                       Console.WriteLine("You have leveld up! You have no empty trait slots.");
-                       Console.ReadLine(); 
-                    }
-                    while(levelingUp)
-                    {
-                        Console.WriteLine("You have gained enough experience that you have leveled up!!");
-                        Console.WriteLine("What trait would you like to gain?");
-                        for(int traitPosition = 0; traitPosition < listOfAttainableTraits.Count(); traitPosition++)
+                        bool levelingUp = false;
+                        if(PlayerOwnedTraits.Contains(emptyTrait) && !PlayerOwnedTraits.Contains(TrollBlood)&& !PlayerOwnedTraits.Contains(weaponProficeny))
                         {
-                            Console.WriteLine($"{traitPosition+1}: {listOfAttainableTraits[traitPosition].name}");
+                            levelingUp = true;
                         }
-                        bool choosingTrait = true;
-                        while(choosingTrait)
+                        else if(PlayerOwnedTraits.Contains(TrollBlood)&&PlayerOwnedTraits.Contains(weaponProficeny))
                         {
-                            int TraitChoiceInt;
-                            bool succesTraitChoice = int.TryParse(Console.ReadLine(), out TraitChoiceInt);
-                            TraitChoiceInt --;
-                            if(succesTraitChoice && TraitChoiceInt < listOfAttainableTraits.Count() && TraitChoiceInt >=0)
+                            Console.WriteLine("You have Leveled up! You have obtained all possible traits!");
+                            Console.ReadLine();
+                        }
+                        else if(PlayerOwnedTraits.Count() >= 10)
+                        {
+                        Console.WriteLine("You have leveld up! You have no empty trait slots.");
+                        Console.ReadLine(); 
+                        }
+                        while(levelingUp)
+                        {
+                            Console.WriteLine("You have gained enough experience that you have leveled up!!");
+                            Console.WriteLine("What trait would you like to gain?");
+                            for(int traitPosition = 0; traitPosition < listOfAttainableTraits.Count(); traitPosition++)
                             {
-                                PlayerOwnedTraits[nextEmptyTrait(PlayerOwnedTraits)] = listOfAttainableTraits[TraitChoiceInt];
-                                choosingTrait = false;
-                                levelingUp = false;
-                                if(listOfAttainableTraits[TraitChoiceInt] == weaponProficeny)
+                                Console.WriteLine($"{traitPosition+1}: {listOfAttainableTraits[traitPosition].name}");
+                            }
+                            bool choosingTrait = true;
+                            while(choosingTrait)
+                            {
+                                int TraitChoiceInt;
+                                bool succesTraitChoice = int.TryParse(Console.ReadLine(), out TraitChoiceInt);
+                                TraitChoiceInt --;
+                                if(succesTraitChoice && TraitChoiceInt < listOfAttainableTraits.Count() && TraitChoiceInt >=0)
                                 {
-                                    weaponProficenyBool = true;
+                                    PlayerOwnedTraits[nextEmptyTrait(PlayerOwnedTraits)] = listOfAttainableTraits[TraitChoiceInt];
+                                    choosingTrait = false;
+                                    levelingUp = false;
+                                    if(listOfAttainableTraits[TraitChoiceInt] == weaponProficeny)
+                                    {
+                                        weaponProficenyBool = true;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("That is not a valid selection, try again.");
+                                    choosingTrait = false;
                                 }
                             }
-                            else
+                        }
+                        Playerlevel++;
+                        experience = 0;
+                    }
+
+                }
+                else if(hit)
+                {
+                    Console.WriteLine($"The {ChosenMonster.name} hits you");
+                    playerHp -= monsterDamageDealt;
+                    temp_playerAC -= monsterDamageDealt;
+                }
+                else if(hit == false)
+                {
+                    Console.WriteLine($"The {ChosenMonster.name} misses");
+                    temp_playerAC -= monsterDamageDealt;
+                }
+                Console.ReadLine();
+                monsterTurn = false;
+                playerTurn = true;
+                if(playerHp <= 0)
+                {
+                    fight = false;
+                    playGame = false;
+                }
+            }
+            else if(bossRoomBool == true)
+            {
+                printMonster(monsterPictureType(monsterType(FloorBoss.name)));
+                Console.WriteLine($"HP: {temp_monsterHp}");
+                bool hit = determineHit(temp_playerAC, FloorBoss.level*2);
+                int monsterDamageDealt = MonsterDamage(FloorBoss);
+                int usedAbility = rand.Next(FloorBoss.abilityUseChance - attemptedUses);
+                attemptedUses ++;
+                if(temp_monsterHp <= 0)
+                {
+                    fight = false;
+                    Console.WriteLine($"You have defeated the {FloorBoss.name}!!");
+                    int goldGain = rollDie(dEight) + (FloorBoss.level *4);
+                    goldCount += goldGain;
+                    Console.WriteLine($"You gained {goldGain} gold pieces");
+                    experience = ExperienceGain(FloorBoss, experience);
+                    bossRoomBool = false;
+
+                    if(LevelUp(experience,Playerlevel))
+                    {
+                        bool levelingUp = false;
+                        if(PlayerOwnedTraits.Contains(emptyTrait))
+                        {
+                            levelingUp = true;
+                        }
+                        else if(PlayerOwnedTraits.Contains(TrollBlood)&&PlayerOwnedTraits.Contains(weaponProficeny))
+                        {
+                            Console.WriteLine("You have Leveled up! You have obtained all possible traits!");
+                            Console.ReadLine();
+                        }
+                        else if(PlayerOwnedTraits.Count() >= 10)
+                        {
+                        Console.WriteLine("You have leveld up! You have no empty trait slots.");
+                        Console.ReadLine(); 
+                        }
+                        while(levelingUp)
+                        {
+                            Console.WriteLine("You have gained enough experience that you have leveled up!!");
+                            Console.WriteLine("What trait would you like to gain?");
+                            for(int traitPosition = 0; traitPosition < listOfAttainableTraits.Count(); traitPosition++)
                             {
-                                Console.WriteLine("That is not a valid selection, try again.");
-                                choosingTrait = false;
+                                Console.WriteLine($"{traitPosition+1}: {listOfAttainableTraits[traitPosition].name}");
+                            }
+                            bool choosingTrait = true;
+                            while(choosingTrait)
+                            {
+                                int TraitChoiceInt;
+                                bool succesTraitChoice = int.TryParse(Console.ReadLine(), out TraitChoiceInt);
+                                TraitChoiceInt --;
+                                if(succesTraitChoice && TraitChoiceInt < listOfAttainableTraits.Count() && TraitChoiceInt >=0)
+                                {
+                                    PlayerOwnedTraits[nextEmptyTrait(PlayerOwnedTraits)] = listOfAttainableTraits[TraitChoiceInt];
+                                    choosingTrait = false;
+                                    levelingUp = false;
+                                    if(listOfAttainableTraits[TraitChoiceInt] == weaponProficeny)
+                                    {
+                                        weaponProficenyBool = true;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("That is not a valid selection, try again.");
+                                    choosingTrait = false;
+                                }
                             }
                         }
+                        Playerlevel++;
+                        experience = 0;
                     }
-                    Playerlevel++;
-                    experience = 0;
+
+                }
+                else if(usedAbility == 1)
+                {
+                    attemptedUses = 0;
+                    playerHp -= FloorBoss.ability(FloorBoss);
+                    if(FloorBoss.abilityName == "Rot")
+                    {
+                        Console.WriteLine("The Rot begins to set in....");
+                        rotTurns += 3;
+                    }
+                    Console.ReadLine();
+                }
+                else if(hit)
+                {
+                    Console.WriteLine($"The {FloorBoss.name} hits you");
+                    playerHp -= monsterDamageDealt;
+                    temp_playerAC -= monsterDamageDealt;
+                }
+                else if(hit == false)
+                {
+                    Console.WriteLine($"The {FloorBoss.name} misses");
+                    temp_playerAC -= monsterDamageDealt;
+                }
+                Console.ReadLine();
+                monsterTurn = false;
+                playerTurn = true;
+                if(playerHp <= 0)
+                {
+                    fight = false;
+                    playGame = false;
                 }
 
-            }
-            else if(hit)
-            {
-                Console.WriteLine($"The {ChosenMonster.name} hits you");
-                playerHp -= monsterDamageDealt;
-                temp_playerAC -= monsterDamageDealt;
-            }
-            else if(hit == false)
-            {
-                Console.WriteLine($"The {ChosenMonster.name} misses");
-                temp_playerAC -= monsterDamageDealt;
-            }
-            Console.ReadLine();
-            monsterTurn = false;
-            playerTurn = true;
-            if(playerHp <= 0)
-            {
-                fight = false;
-                playGame = false;
             }
         }
 
@@ -1532,7 +1672,7 @@ void TrapRoom()
                 Console.WriteLine("You have solved the riddle! You escape unscathed!");
                 solvingTrap = false;
             }
-            else if(riddle.answer.Contains(answer.ToLower()))
+            else if(!riddle.answer.Contains(answer.ToLower()))
             {
                 Console.WriteLine("That answer is not correct, time is passing....");
                 turnCount++;
@@ -1966,6 +2106,19 @@ class Monsters
     public int MonsterAC;
     public int MonsterAttackDamage;
     public int experienceWorth;
+}
+class Boss :Monsters
+{
+    public string? abilityName;
+    public int abilityDamageDie;
+    public int abilityUseChance;
+    public int ability(Boss boss)
+    {
+        Random rand = new Random();
+        Console.WriteLine($"{boss.name} uses {boss.abilityName}");
+        int damageDealt = rand.Next(boss.abilityDamageDie) + boss.level;
+        return damageDealt;
+    }
 }
 class Items
 {
