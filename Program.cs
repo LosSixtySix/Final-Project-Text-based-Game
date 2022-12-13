@@ -24,7 +24,7 @@ int rollDie(int dice)
 
 //Dungeon Creator Variables//
 int dungeonLevel = 1;
-int numberOfRooms = 14;
+int numberOfRooms = 1;
 int maxRooms = 20;
 int maxDungeonLevels = 4;
 bool bossRoom = false;
@@ -148,25 +148,32 @@ sandPit.maxTurnsToSolve = 5;
 List<Traps> trapRoomPullList = new List<Traps>(){sandPit};
 
 //Riddles for Trap Room//
+    //riddle answers list//
+string[] riddle1Answers = new string[]{"mountain", "mountains","a mountain","the mountain","the mountains"};
+string[] riddle2Answers = new string[]{"wind","the wind","breeze"};
+string[] riddle3Answers = new string[]{"dark","darkness","the dark", "blackness"};
+string[] riddle4Answers = new string[]{"fish","fishes","a fish","the fish"};
+string[] riddle5Answers = new string[]{"time", "age"};
+
 TrapRiddles riddle1 = new TrapRiddles();
 riddle1.name = File.ReadAllText("riddle1.txt");
-riddle1.answer = "mountain";
+riddle1.answer = riddle1Answers;
 
 TrapRiddles riddle2 = new TrapRiddles();
 riddle2.name = File.ReadAllText("riddle2.txt");
-riddle2.answer = "wind";
+riddle2.answer = riddle2Answers;
 
 TrapRiddles riddle3 = new TrapRiddles();
 riddle3.name = File.ReadAllText("riddle3.txt");
-riddle3.answer = "dark";
+riddle3.answer = riddle3Answers;
 
 TrapRiddles riddle4 = new TrapRiddles();
 riddle4.name = File.ReadAllText("riddle4.txt");
-riddle4.answer = "fish";
+riddle4.answer = riddle4Answers;
 
 TrapRiddles riddle5 = new TrapRiddles();
 riddle5.name = File.ReadAllText("riddle5.txt");
-riddle5.answer = "time";
+riddle5.answer = riddle5Answers;
 
 List<TrapRiddles> riddles = new List<TrapRiddles>(){riddle1, riddle2, riddle3, riddle4, riddle5};
 
@@ -291,8 +298,8 @@ Items equippedBoots = wornBoots;
 Items equippedWeapon = sword;
 Items equippedShield = shield;
     //Player Variables
-int goldCount = 10;
-int hitPoints = 20;
+int goldCount = 20;
+int hitPoints = 30;
 int Playerlevel = 1;
 int experience = 0;
 int inventoryCount = 5;
@@ -307,7 +314,6 @@ for(int backPackPlace = 0; backPackPlace < backPack.Length; backPackPlace++)
 }
 backPack.SetValue(expertHealthPotion, 0);
 backPack.SetValue(RepairArmor, 1);
-backPack.SetValue(expertHealthPotion, 3);
 
 //Combat//
 string [] knightRows = File.ReadAllLines("knight.txt");
@@ -316,7 +322,27 @@ void combat()
 {
     // Determine monster type
     Monsters ChosenMonster = listOfMonstersLevelOne[0];
-    string bossNumber = dungeonLevel.ToString();
+
+    //Help to print the boss correctly//
+    int bossPicNumber(int x)
+    {
+        if(dungeonLevel == 1)
+        {
+            return 38;
+        }
+        if(dungeonLevel == 2)
+        {
+            return 32;
+        }
+        if(dungeonLevel == 3)
+        {
+            return 22;
+        }
+        return 0;
+    }
+
+    //Monster chooser and boss printer//
+    string bossNumber = bossPicNumber(dungeonLevel).ToString();
     if(dungeonLevel == 1)
     {
         if(bossRoomBool)
@@ -677,7 +703,7 @@ void combat()
                 goldCount += goldGain;
                 Console.WriteLine($"You gained {goldGain} gold pieces");
                 experience = ExperienceGain(ChosenMonster, experience);
-                Console.ReadLine();
+
                 if(LevelUp(experience,Playerlevel))
                 {
                     bool levelingUp = false;
@@ -809,6 +835,18 @@ static int monsterType(string name)
     else if(name == "Thorn")
     {
         return 28;
+    }
+    else if(name == "Wyrm Wood")
+    {
+        return 38;
+    }
+    else if(name == "The Flayer")
+    {
+        return 32;
+    }
+    else if(name == "The Dread Choir")
+    {
+        return 22;
     }
     return 1;
 }
@@ -994,10 +1032,11 @@ void shop()
 
                                 while(choosingSlot)
                                 {
-
-                                    PrintInventory(backPack);
+                                    Console.Clear();
+                                    Console.WriteLine();
                                     Console.WriteLine("You have no empty slots left in your backpack.");
                                     Console.WriteLine("Which slot would you like to put it in?");
+                                    PrintInventory(backPack);
                                     int slotChoice;
                                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                                     slotChoice --;
@@ -1061,9 +1100,10 @@ void shop()
                                 while(choosingSlot)
                                 {
 
-                                    PrintInventory(backPack);
+                                    Console.WriteLine();
                                     Console.WriteLine("You have no empty slots left in your backpack.");
                                     Console.WriteLine("Which slot would you like to put it in?");
+                                    PrintInventory(backPack);
                                     int slotChoice;
                                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                                     slotChoice --;
@@ -1128,9 +1168,10 @@ void shop()
                                 while(choosingSlot)
                                 {
 
-                                    PrintInventory(backPack);
+                                    Console.WriteLine();
                                     Console.WriteLine("You have no empty slots left in your backpack.");
                                     Console.WriteLine("Which slot would you like to put it in?");
+                                    PrintInventory(backPack);
                                     int slotChoice;
                                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                                     slotChoice --;
@@ -1195,9 +1236,10 @@ void shop()
                                 while(choosingSlot)
                                 {
 
-                                    PrintInventory(backPack);
+                                    Console.WriteLine();
                                     Console.WriteLine("You have no empty slots left in your backpack.");
                                     Console.WriteLine("Which slot would you like to put it in?");
+                                    PrintInventory(backPack);
                                     int slotChoice;
                                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                                     slotChoice --;
@@ -1262,9 +1304,10 @@ void shop()
                                 while(choosingSlot)
                                 {
 
-                                    PrintInventory(backPack);
+                                    Console.WriteLine();
                                     Console.WriteLine("You have no empty slots left in your backpack.");
                                     Console.WriteLine("Which slot would you like to put it in?");
+                                    PrintInventory(backPack);
                                     int slotChoice;
                                     bool successChoice = int.TryParse(Console.ReadLine(), out slotChoice);
                                     slotChoice --;
@@ -1372,6 +1415,7 @@ void ItemDropRoom()
     bool makingDecision = true;
     while(makingDecision)
     {
+        
         Console.Clear();
         Console.WriteLine($"You found a {droppedItem.name}, would you like to pick it up? Press y for yes and n for no");
         PrintInventory(backPack);
@@ -1483,12 +1527,12 @@ void TrapRoom()
         }
         else if (succesfulAnswer == false)
         {
-            if(answer.ToLower() == riddle.answer)
+            if(riddle.answer.Contains(answer.ToLower()))
             {
                 Console.WriteLine("You have solved the riddle! You escape unscathed!");
                 solvingTrap = false;
             }
-            else if(answer.ToLower() != riddle.answer)
+            else if(riddle.answer.Contains(answer.ToLower()))
             {
                 Console.WriteLine("That answer is not correct, time is passing....");
                 turnCount++;
@@ -1691,6 +1735,10 @@ void randRoomGenerator()
     while(determineRoom)
     {
         int randRoom = rand.Next(1,20);
+        if(numberOfRooms < 5 && randRoom == 6)
+        {
+            randRoom = 4;
+        }
         if(bossRoom == true)
         {
             bossRoomBool = boss_Room();
@@ -1762,8 +1810,6 @@ void randRoomGenerator()
                 {
                     if(roomsAlreadyRolled[2] != "MiniBoss")
                     {
-                        Console.WriteLine("Calling Mini Boss");
-                        Console.ReadLine();
                         miniBossRoomBool = MiniBoss();
                         combat();
                         miniBossRoomBool = false;
@@ -1885,14 +1931,24 @@ void main()
                         Console.ReadLine();
                         playerHp += 1;
                     }
+                    else
+                    {
+                        Console.WriteLine("Press enter to continue.");
+                        Console.ReadLine();
+                    }
                 }
+                else if(hardCoreMode == true)
+                {
+                    Console.WriteLine("Press enter to continue.");
+                    Console.ReadLine();
+                }
+
+                
             }
             else if(dungeonLevel >= maxDungeonLevels)
             {
                 playGame = false;
             }
-            Console.WriteLine("Press Enter to continue");
-            Console.ReadLine();
         }
     }
     if(playerHp> 0)
@@ -1943,5 +1999,5 @@ class Traps
 class TrapRiddles 
 {
     public string? name;
-    public string? answer;
+    public string[]? answer;
 }
